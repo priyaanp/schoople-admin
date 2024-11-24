@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>{{ offer and "Edit Offer" or "Add Offer" }}</h2>
+<form method="post">
+    <label>Subscription:
+        <select name="subscription_id">
+            {% for subscription in subscriptions %}
+                <option value="{{ subscription.id }}" {% if offer and offer.subscription_id == subscription.id %}selected{% endif %}>
+                    {{ subscription.title }}
+                </option>
+            {% endfor %}
+        </select>
+    </label><br>
+    <label>Title: <input type="text" name="title" value="{{ offer and offer.title }}"></label><br>
+    <label>Offer Percentage: <input type="text" name="offer_percentage" value="{{ offer and offer.offer_percentage }}"></label><br>
+    <label>Discount Amount: <input type="text" name="discount_amount" value="{{ offer and offer.discount_amount }}"></label><br>
+    <label>Additional Amount: <input type="text" name="additional_amount" value="{{ offer and offer.additional_amount }}"></label><br>
+    <label>Launch Date: <input type="date" name="launch" value="{{ offer and offer.launch }}"></label><br>
+    <label>Expiry Date: <input type="date" name="expiry" value="{{ offer and offer.expiry }}"></label><br>
+    <label>Is School Specific: <input type="checkbox" name="is_school_specific" {% if offer and offer.is_school_secific %}checked{% endif %}></label><br>
+    <label>Status: <input type="checkbox" name="status" {% if offer and offer.status %}checked{% endif %}></label><br>
+    <button type="submit">Save</button>
+</form>
+{% endblock %}
