@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ record and 'Edit Record' or 'Add Record' }}</title>
+</head>
+<body>
+    <h1>{{ record and 'Edit Record' or 'Add Record' }}</h1>
+    <form method="post">
+        <label>School Subscription:
+            <select name="school_subscription_id" required>
+                {% for ss in school_subscriptions %}
+                    <option value="{{ ss.id }}" {% if record and record.school_subscription_id == ss.id %}selected{% endif %}>
+                        {{ ss.subscription_amount }}
+                    </option>
+                {% endfor %}
+            </select>
+        </label><br>
+        <label>Module:
+            <select name="module_id" required>
+                {% for module in modules %}
+                    <option value="{{ module.id }}" {% if record and record.module_id == module.id %}selected{% endif %}>
+                        {{ module.module_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </label><br>
+        <label>Role:
+            <select name="role_id" required>
+                {% for role in roles %}
+                    <option value="{{ role.id }}" {% if record and record.role_id == role.id %}selected{% endif %}>
+                        {{ role.role_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </label><br>
+        <label>Permission:
+            <select name="permission_id" required>
+                {% for permission in permissions %}
+                    <option value="{{ permission.id }}" {% if record and record.permission_id == permission.id %}selected{% endif %}>
+                        {{ permission.permission_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </label><br>
+        <button type="submit">Save</button>
+    </form>
+</body>
+</html>

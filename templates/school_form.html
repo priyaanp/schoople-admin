@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ school and 'Edit School' or 'Add School' }}</title>
+</head>
+<body>
+    <h1>{{ school and 'Edit School' or 'Add School' }}</h1>
+    <form method="post">
+        <label>Code:
+            <input type="text" name="code" value="{{ school and school.code }}" required>
+        </label><br>
+        <label>Title:
+            <input type="text" name="title" value="{{ school and school.title }}" required>
+        </label><br>
+        <label>Description:
+            <textarea name="description">{{ school and school.description }}</textarea>
+        </label><br>
+        <label>Address:
+            <textarea name="address">{{ school and school.address }}</textarea>
+        </label><br>
+        <label>Phone:
+            <input type="text" name="phone" value="{{ school and school.phone }}">
+        </label><br>
+        <label>Syllabus:
+            <input type="text" name="syllabus" value="{{ school and school.syllabus }}">
+        </label><br>
+        <label>Status:
+            <input type="checkbox" name="status" {% if school and school.status %}checked{% endif %}>
+        </label><br>
+        <button type="submit">Save</button>
+    </form>
+</body>
+</html>

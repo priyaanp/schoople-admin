@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ year and 'Edit Academic Year' or 'Add Academic Year' }}</title>
+</head>
+<body>
+    <h1>{{ year and 'Edit Academic Year' or 'Add Academic Year' }}</h1>
+    <form method="post">
+        <label>Start Date:
+            <input type="date" name="start_date" value="{{ year and year.start_date }}" required>
+        </label><br>
+        <label>End Date:
+            <input type="date" name="end_date" value="{{ year and year.end_date }}" required>
+        </label><br>
+        <label>Status:
+            <input type="checkbox" name="active" {% if year and year.active %}checked{% endif %}>
+        </label><br>
+        <button type="submit">Save</button>
+    </form>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ user and 'Edit User' or 'Add User' }}</title>
+</head>
+<body>
+    <h1>{{ user and 'Edit User' or 'Add User' }}</h1>
+    <form method="post">
+        <label>Username:
+            <input type="text" name="username" value="{{ user and user.username }}" required>
+        </label><br>
+        <label>Password:
+            <input type="password" name="password" value="{{ user and user.password }}" required>
+        </label><br>
+        <label>Status:
+            <input type="checkbox" name="is_active" {% if user and user.is_active %}checked{% endif %}>
+        </label><br>
+        <label>Roles:</label><br>
+        {% for role in roles %}
+            <input type="checkbox" name="roles" value="{{ role.id }}" 
+            {% if user and role.id in assigned_roles %}checked{% endif %}>
+            {{ role.role_name }}<br>
+        {% endfor %}
+        <button type="submit">Save</button>
+    </form>
+</body>
+</html>

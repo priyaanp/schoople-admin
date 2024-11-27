@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ subscription and 'Edit School Subscription' or 'Add School Subscription' }}</title>
+</head>
+<body>
+    <h1>{{ subscription and 'Edit School Subscription' or 'Add School Subscription' }}</h1>
+    <form method="post">
+        <label>School:
+            <select name="school_id" required>
+                {% for school in schools %}
+                    <option value="{{ school.id }}" {% if subscription and subscription.school_id == school.id %}selected{% endif %}>
+                        {{ school.title }}
+                    </option>
+                {% endfor %}
+            </select>
+        </label><br>
+        <label>Subscription:
+            <select name="subscription_id" required>
+                {% for sub in subscriptions %}
+                    <option value="{{ sub.id }}" {% if subscription and subscription.subscription_id == sub.id %}selected{% endif %}>
+                        {{ sub.title }}
+                    </option>
+                {% endfor %}
+            </select>
+        </label><br>
+        <label>Offer (Optional):
+            <select name="offer_id">
+                <option value="">None</option>
+                {% for offer in offers %}
+                    <option value="{{ offer.id }}" {% if subscription and subscription.offer_id == offer.id %}selected{% endif %}>
+                        {{ offer.title }}
+                    </option>
+                {% endfor %}
+            </select>
+        </label><br>
+        <label>Academic Year:
+            <select name="academic_year_id" required>
+                {% for year in academic_years %}
+                    <option value="{{ year.id }}" {% if subscription and subscription.academic_year_id == year.id %}selected{% endif %}>
+                        {{ year.start_date }} - {{ year.end_date }}
+                    </option>
+                {% endfor %}
+            </select>
+        </label><br>
+        <label>No of Students:
+            <input type="text" name="no_of_students_subscription" value="{{ subscription and subscription.no_of_students_subscription }}">
+        </label><br>
+        <label>Subscription Amount:
+            <input type="text" name="subscription_amount" value="{{ subscription and subscription.subscription_amount }}">
+        </label><br>
+        <label>Payment Status:
+            <select name="payment_status">
+                <option value="0" {% if subscription and subscription.payment_status == 0 %}selected{% endif %}>None</option>
+                <option value="1" {% if subscription and subscription.payment_status == 1 %}selected{% endif %}>Paid</option>
+                <option value="2" {% if subscription and subscription.payment_status == 2 %}selected{% endif %}>Not Paid</option>
+            </select>
+        </label><br>
+        <label>Payment Date:
+            <input type="date" name="payment_date" value="{{ subscription and subscription.payment_date }}">
+        </label><br>
+        <label>Status:
+            <input type="checkbox" name="status" {% if subscription and subscription.status %}checked{% endif %}>
+        </label><br>
+        <label>Subscription Date:
+            <input type="date" name="subscription_date" value="{{ subscription and subscription.subscription_date }}">
+        </label><br>
+        <label>Expiry Date:
+            <input type="date" name="expiry_date" value="{{ subscription and subscription.expiry_date }}">
+        </label><br>
+        <button type="submit">Save</button>
+    </form>
+</body>
+</html>

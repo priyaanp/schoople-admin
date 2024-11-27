@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ module and 'Edit Module' or 'Add Module' }}</title>
+</head>
+<body>
+    <h1>{{ module and 'Edit Module' or 'Add Module' }}</h1>
+    <form method="post">
+        <label>Module Name:
+            <input type="text" name="module_name" value="{{ module and module.module_name }}" required>
+        </label><br>
+        <label>Menu Name:
+            <input type="text" name="menu_name" value="{{ module and module.menu_name }}" required>
+        </label><br>
+        <label>Parent Module:
+            <select name="parent_id">
+                <option value="">None</option>
+                {% for m in modules %}
+                    <option value="{{ m.id }}" {% if module and module.parent_id == m.id %}selected{% endif %}>
+                        {{ m.module_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </label><br>
+        <label>Status:
+            <input type="checkbox" name="is_active" {% if module and module.is_active %}checked{% endif %}>
+        </label><br>
+        <label>Visible in App:
+            <input type="checkbox" name="is_visible_in_app" {% if module and module.is_visible_in_app %}checked{% endif %}>
+        </label><br>
+        <button type="submit">Save</button>
+    </form>
+</body>
+</html>

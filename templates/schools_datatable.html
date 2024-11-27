@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schools Table</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <style>
+        .btn {
+            padding: 5px 10px;
+            margin: 2px;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-edit {
+            background-color: #007bff;
+        }
+        .btn-delete {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <h1>Schools Table</h1>
+    <a href="/schools/add" class="btn btn-edit">Add School</a>
+    <table id="schoolsTable" class="display">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Code</th>
+                <th>Title</th>
+                <th>Syllabus</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+    </table>
+
+    <script>
+        $(document).ready(function () {
+            const table = $('#schoolsTable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: '/api/schools',
+                    type: 'GET'
+                },
+                columns: [
+                    {
+                        data: 'id',
+                        render: (data, type, row, meta) => meta.row + 1 // Serial number
+                    },
+                    { data: 'code' },
+                    { data: 'title' },
+                    { data: 'syllabus' },
+                    { data: 'status' },
+                    {
+                        data: 'id',
+                        render: (data) => `
+                            <a href="/edit/schools/${data}" class="btn btn-edit">Edit</a>
+                            <button class="btn btn-delete" onclick="deleteSchool(${data})">Delete</button>
+                        `
+                    }
+                ]
+            });
+
+            // Delete School
+            window.deleteSchool = function (id) {
+                if (confirm('Are you sure you want to delete this school?')) {
+                    $.ajax({
+                        url: `/delete/schools/${id}`,
+                        type: 'POST',
+                        success: function (response) {
+                            alert(response.message);
+                            table.ajax.reload(); // Reload the DataTable
+                        },
+                        error: function () {
+                            alert('Failed to delete the school.');
+                        }
+                    });
+                }
+            };
+        });
+    </script>
+</body>
+</html>

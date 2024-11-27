@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ role and 'Edit Role' or 'Add Role' }}</title>
+</head>
+<body>
+    <h1>{{ role and 'Edit Role' or 'Add Role' }}</h1>
+    <form method="post">
+        <label>Role Name:
+            <input type="text" name="role_name" value="{{ role and role.role_name }}" required>
+        </label><br>
+        <label>Role Type:
+            <select name="role_type">
+                {% for role_type in role_types %}
+                    <option value="{{ role_type }}" {% if role and role.role_type == role_type %}selected{% endif %}>
+                        {{ role_type.capitalize() }}
+                    </option>
+                {% endfor %}
+            </select>
+        </label><br>
+        <label>Status:
+            <input type="checkbox" name="is_active" {% if role and role.is_active %}checked{% endif %}>
+        </label><br>
+        <button type="submit">Save</button>
+    </form>
+</body>
+</html>
