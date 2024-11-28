@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clubs</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Clubs</h1>
+        <a href="/clubs/add" class="btn btn-success mb-3">Add Club</a>
+        <table id="clubsTable" class="display">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            const table =  $('#clubsTable').DataTable({
+                ajax: '/api/club',
+                columns: [
+                    {
+                        data: 'id',
+                        render: (data, type, row, meta) => meta.row + 1,
+                    },
+                    { data: 'title' },
+                    { data: 'description' },
+                    { data: 'status' },
+                    {
+                        data: 'id',
+                        render: (data) => `
+                            <a href="/clubs/edit/${data}" class="btn btn-edit">Edit</a>
+                            <button class="btn btn-delete" onclick="deleteModule(${data})">Delete</button>
+                        `,
+                    },
+                ],
+            });
+            window.deleteModule = function (id) {
+                if (confirm('Are you sure you want to delete this module?')) {
+                    $.ajax({
+                        url: `/clubs/delete/${id}`,
+                        type: 'POST',
+                        success: function (response) {
+                            alert(response.message);
+                            table.ajax.reload(); // Reload the DataTable
+                        },
+                        error: function () {
+                            alert('Failed to delete the module.');
+                        }
+                    });
+                }
+            };
+        });
+    </script>
+</body>
+</html>

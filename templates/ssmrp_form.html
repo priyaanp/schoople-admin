@@ -12,7 +12,7 @@
             <select name="school_subscription_id" required>
                 {% for ss in school_subscriptions %}
                     <option value="{{ ss.id }}" {% if record and record.school_subscription_id == ss.id %}selected{% endif %}>
-                        {{ ss.subscription_amount }}
+                        {{ ss.title }}
                     </option>
                 {% endfor %}
             </select>

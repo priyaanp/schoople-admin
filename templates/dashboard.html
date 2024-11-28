@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,29 +14,35 @@
             position: fixed;
             padding-top: 20px;
         }
+
         .sidebar a {
             color: white;
             text-decoration: none;
             padding: 10px 20px;
             display: block;
         }
+
         .sidebar a:hover {
             background-color: #495057;
         }
+
         .main {
             margin-left: 250px;
             padding: 20px;
         }
+
         .navbar {
             background-color: #343a40;
             color: white;
         }
     </style>
 </head>
+
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-dark">
         <div class="container-fluid">
+            {% if session['is_superadmin'] %}
             <ul class="navbar-nav ml-auto">
                 <!-- School Select Box (visible only to superadmin) -->
                 <li class="nav-item" id="school-select-container" style="display: none;">
@@ -43,8 +50,9 @@
                         <option value="">Select School</option>
                     </select>
                 </li>
-     
+
             </ul>
+            {% endif %}
             <span class="navbar-brand mb-0 h1">Dashboard</span>
             <form action="/logout" method="POST" class="d-inline">
                 <button type="submit" class="btn btn-danger btn-sm">Logout</button>
@@ -54,10 +62,10 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
 
         <div class="collapse navbar-collapse" id="navbarNav">
-            
+
         </div>
     </nav>
-    
+
     <div class="d-flex">
         <!-- Sidebar -->
         <div class="sidebar">
@@ -81,99 +89,109 @@
         // Function to fetch menu items from the backend
 
         document.addEventListener('DOMContentLoaded', function () {
-    // Fetch the school subscription and populate menu
-    const schoolSelect = document.getElementById('school-select');
-    const menuList = document.getElementById('menu-list');
+            // Fetch the school subscription and populate menu
+            const schoolSelect = document.getElementById('school-select');
+            const menuList = document.getElementById('menu-list');
 
-    // On school selection, fetch the menu items
-    schoolSelect.addEventListener('change', function () {
-        const schoolSubscriptionId = this.value; // Selected school subscription ID
+            // On school selection, fetch the menu items
+            schoolSelect.addEventListener('change', function () {
+                const schoolSubscriptionId = this.value; // Selected school subscription ID
 
-        if (!schoolSubscriptionId) {
-            menuList.innerHTML = "<li>Please select a school</li>";
-            return;
+                if (!schoolSubscriptionId) {
+                    menuList.innerHTML = "<li>Please select a school</li>";
+                    return;
+                }
+
+                // Fetch menu items from API
+                loadMenuItem(schoolSubscriptionId);
+            });
+        });
+
+
+
+
+
+        // Call the function on page load
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Check if the user is superadmin
+            const userRole = "{{ session['role_id'] }}"; 
+            const superadminRoleId = "{{ session['is_superadmin'] | tojson }}";
+            const subscriptionId = "{{ session['subscription_id']}}";  
+            
+            if (superadminRoleId == 'true') {
+                
+                // Make the dropdown visible
+                document.getElementById('school-select-container').style.display = 'block';
+
+                // Fetch the list of schools
+                fetch('/api/get_schools')
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch schools');
+                        }
+                        return response.json();
+                    })
+                    .then((data) => {
+                        const schoolSelect = document.getElementById('school-select');
+                        data.forEach((school) => {
+                            const option = document.createElement('option');
+                            option.value = school.sid;
+                            option.textContent = school.title;
+                            schoolSelect.appendChild(option);
+                        });
+                    })
+                    .catch((error) => {
+                        console.error('Error fetching schools:', error);
+                    });
+            }else{  
+                   
+                loadMenuItem(subscriptionId);
+            }
+        });
+
+        // Logout button action
+        document.getElementById('logout-button').addEventListener('click', function () {
+            window.location.href = '/logout'; // Redirect to logout
+        });
+
+        function loadMenuItem(schoolSubscriptionId){
+            fetch(`/api/get_menu_items?school_subscription_id=`+schoolSubscriptionId)
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch menu items');
+                        }
+                        return response.json();
+                    })
+                    .then((data) => {
+                        // Clear existing menu items
+                        const menuItems = data;
+
+                        // Check if there was an error
+                        if (menuItems.error) {
+                            console.error(menuItems.error);
+                            return;
+                        }
+
+                        // Render the menu dynamically
+                        const menuContainer = document.getElementById('menu-items');
+                        menuContainer.innerHTML = ''; // Clear existing items
+
+                        menuItems.forEach(item => {
+                            const menuLink = document.createElement('a');
+                            menuLink.href = `/${item.link}`; // Example link
+                            menuLink.innerText = item.menu_name;
+                            menuContainer.appendChild(menuLink);
+                        });
+                    })
+                    .catch((error) => {
+                        console.error('Error fetching menu items:', error);
+                        menuList.innerHTML = "<li>Error loading menu</li>";
+                    });
         }
 
-        // Fetch menu items from API
-        fetch(`/api/get_menu_items?school_subscription_id=${schoolSubscriptionId}`)
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error('Failed to fetch menu items');
-                }
-                return response.json();
-            })
-            .then((data) => {
-                // Clear existing menu items
-                const menuItems = data;
-    
-    // Check if there was an error
-    if (menuItems.error) {
-        console.error(menuItems.error);
-        return;
-    }
-
-    // Render the menu dynamically
-    const menuContainer = document.getElementById('menu-items');
-    menuContainer.innerHTML = ''; // Clear existing items
-
-    menuItems.forEach(item => {
-        const menuLink = document.createElement('a');
-        menuLink.href = `/module/${item.id}`; // Example link
-        menuLink.innerText = item.menu_name;
-        menuContainer.appendChild(menuLink);
-    });
-            })
-            .catch((error) => {
-                console.error('Error fetching menu items:', error);
-                menuList.innerHTML = "<li>Error loading menu</li>";
-            });
-    });
-});
-
-       
-
-
-    
-        // Call the function on page load
-        
-        document.addEventListener('DOMContentLoaded', function () {
-    // Check if the user is superadmin
-    const userRole = "{{ session['role_id'] }}"; // Get user role from Flask session
-    const superadminRoleId = 3; // Assuming 1 is the role ID for superadmin
-
-    if (parseInt(userRole) === superadminRoleId) {
-        // Make the dropdown visible
-        document.getElementById('school-select-container').style.display = 'block';
-
-        // Fetch the list of schools
-        fetch('/api/get_schools')
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error('Failed to fetch schools');
-                }
-                return response.json();
-            })
-            .then((data) => {
-                const schoolSelect = document.getElementById('school-select');
-                data.forEach((school) => {
-                    const option = document.createElement('option');
-                    option.value = school.sid;
-                    option.textContent = school.title;
-                    schoolSelect.appendChild(option);
-                });
-            })
-            .catch((error) => {
-                console.error('Error fetching schools:', error);
-            });
-    }
-});
-
-// Logout button action
-document.getElementById('logout-button').addEventListener('click', function () {
-    window.location.href = '/logout'; // Redirect to logout
-});
-
     </script>
-    
+
 </body>
+
 </html>

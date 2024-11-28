@@ -8,6 +8,9 @@
 <body>
     <h1>{{ subscription and 'Edit School Subscription' or 'Add School Subscription' }}</h1>
     <form method="post">
+        <label>Title:
+            <input type="text" name="title" value="{{ subscription and subscription.title }}">
+        </label><br>
         <label>School:
             <select name="school_id" required>
                 {% for school in schools %}

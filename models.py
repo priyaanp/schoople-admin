@@ -43,12 +43,12 @@ class User(db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
-    '''staff_id = db.Column(db.Integer, db.ForeignKey('staffs.id'), nullable=True)
-    student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=True)'''
+    staff_id = db.Column(db.Integer, db.ForeignKey('staffs.id'), nullable=True)
+    '''student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=True)'''
     username = db.Column(db.String, nullable=False, unique=True)
     password = db.Column(db.String, nullable=False)
     is_active = db.Column(db.Boolean, default=True)
-
+    staff = db.relationship('Staff', backref='user', lazy='joined')
     roles = db.relationship('Role', secondary='user_roles', backref='users')
     def check_password(self, password):
         return check_password_hash(self.password, password)
@@ -93,6 +93,7 @@ class SchoolSubscription(db.Model):
     __tablename__ = 'school_subscription'
 
     id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String, nullable=False)
     school_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
     subscription_id = db.Column(db.Integer, db.ForeignKey('subscriptions.id'), nullable=False)
     offer_id = db.Column(db.Integer, db.ForeignKey('offers.id'), nullable=True)
@@ -116,6 +117,7 @@ class Module(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     module_name = db.Column(db.String, nullable=False)
     menu_name = db.Column(db.String, nullable=False)
+    module_link = db.Column(db.String, nullable=False)
     parent_id = db.Column(db.Integer, db.ForeignKey('modules.id'), nullable=True)  # Allow null for parent_id
     is_active = db.Column(db.Boolean, default=True)
     is_visible_in_app = db.Column(db.Boolean, default=True)
@@ -164,3 +166,14 @@ class Staff(db.Model):
 
     school = db.relationship('School', backref='staffs')
     staff_type = db.relationship('StaffType', backref='staffs')
+
+class Club(db.Model):
+    __tablename__ = 'clubs'
+
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
+    title = db.Column(db.String, nullable=False)
+    description = db.Column(db.String, nullable=True)
+    status = db.Column(db.Boolean, default=True)
+
+    school = db.relationship('School', backref='clubs')

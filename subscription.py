@@ -3,14 +3,21 @@ from flask import session as flask_session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text 
-from models import db, Offer,Subscription,Role,User,UserRole,Permission,School,AcademicYear,SchoolSubscription,Module,SchoolSubscriptionModuleRolePermission,StaffType,Staff
+from models import Club, db, Offer,Subscription,Role,User,UserRole,Permission,School,AcademicYear,SchoolSubscription,Module,SchoolSubscriptionModuleRolePermission,StaffType,Staff
+
+from config import DevelopmentConfig, TestingConfig, ProductionConfig
 
 app = Flask(__name__)
 
-# Configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost/schoopledb'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'your_secret_key'
+# Choose the configuration based on an environment variable or hardcoded value
+env = 'development'  # Change to 'testing' or 'production' as needed
+
+if env == 'development':
+    app.config.from_object(DevelopmentConfig)
+elif env == 'testing':
+    app.config.from_object(TestingConfig)
+elif env == 'production':
+    app.config.from_object(ProductionConfig)
 
 # Initialize the database
 db.init_app(app)
@@ -820,6 +827,7 @@ def api_school_subscriptions():
 @app.route('/school_subscriptions/add', methods=['GET', 'POST'])
 def add_school_subscription():
     if request.method == 'POST':
+        title = request.form['title']
         school_id = request.form['school_id']
         subscription_id = request.form['subscription_id']
         offer_id = request.form.get('offer_id')  # Optional
@@ -835,6 +843,7 @@ def add_school_subscription():
 
         # Create a new school subscription
         new_subscription = SchoolSubscription(
+            title = title,
             school_id=school_id,
             subscription_id=subscription_id,
             offer_id=offer_id,
@@ -872,6 +881,7 @@ def edit_school_subscription(id):
     subscription = SchoolSubscription.query.get_or_404(id)
 
     if request.method == 'POST':
+        subscription.title = request.form['title']
         subscription.school_id = request.form['school_id']
         subscription.subscription_id = request.form['subscription_id']
         offer_id = request.form.get('offer_id')  # Optional, may be empty
@@ -931,6 +941,7 @@ def api_ssmrp():
     query = SchoolSubscriptionModuleRolePermission.query.outerjoin(SchoolSubscription).outerjoin(Module).outerjoin(Role).outerjoin(Permission)
     if search_value:
         query = query.filter(
+            SchoolSubscription.title.ilike(f'%{search_value}%') |
             Module.module_name.ilike(f'%{search_value}%') |
             Role.role_name.ilike(f'%{search_value}%') |
             Permission.permission_name.ilike(f'%{search_value}%')
@@ -946,7 +957,7 @@ def api_ssmrp():
     data = [
         {
             "id": record.id,
-            "school_subscription": record.school_subscription.subscription_amount,
+            "title": record.school_subscription.title,
             "module": record.module.module_name,
             "role": record.role.role_name,
             "permission": record.permission.permission_name
@@ -1085,6 +1096,7 @@ def add_module():
     if request.method == 'POST':
         module_name = request.form['module_name']
         menu_name = request.form['menu_name']
+        module_link = request.form['module_link']
         parent_id = request.form.get('parent_id')  # Optional
         parent_id = parent_id if parent_id else None  # Set to NULL if not provided
         is_active = request.form.get('is_active') == 'on'
@@ -1094,6 +1106,7 @@ def add_module():
         new_module = Module(
             module_name=module_name,
             menu_name=menu_name,
+            module_link=module_link,
             parent_id=parent_id,
             is_active=is_active,
             is_visible_in_app=is_visible_in_app
@@ -1115,6 +1128,7 @@ def edit_module(id):
     if request.method == 'POST':
         module.module_name = request.form['module_name']
         module.menu_name = request.form['menu_name']
+        module.module_link= request.form['module_link']
         parent_id = request.form.get('parent_id')  # Optional
         module.parent_id = parent_id if parent_id else None  # Set to NULL if not selected
         module.is_active = request.form.get('is_active') == 'on'
@@ -1149,7 +1163,7 @@ def api_school_subscriptions1(school_id=None):
     data = [
         {
             "id": sub.id,
-            "subscription": sub.subscription.title,
+            "subscription": sub.title,
             "academic_year": f"{sub.academic_year.start_date} - {sub.academic_year.end_date}",
             "subscription_amount": sub.subscription_amount,
             "status": "Active" if sub.status else "Inactive"
@@ -1167,11 +1181,18 @@ def login():
         password = request.form['password']
 
         user = User.query.filter_by(username=username).first()
-        
+        print("first")
+        print(user.staff_id)
+        print("second")
         if user :
             session['user_id'] = user.id
             session['role'] = user_role(user.id)  # Fetch user's role dynamically
             session['role_id'] = user_role_id(user.id)  # Fetch user's role dynamically
+            session['is_superadmin'] = is_superadmin(user.id) 
+           
+            if(user.staff_id): 
+                get_subscription(user.staff_id) 
+            
             return redirect('/dashboard')
         else:
             return "Invalid username or password", 401
@@ -1185,6 +1206,30 @@ def user_role_id(user_id):
     # Fetch user role from UserRoles table
     user_role = db.session.query(Role.id).join(UserRole, Role.id == UserRole.role_id).filter(UserRole.user_id == user_id).first()
     return user_role[0] if user_role else None
+def is_superadmin(user_id):
+    """Check if the logged-in user is a superadmin."""
+    
+    if not user_id:
+        return False    
+    user_roles = UserRole.query.filter_by(user_id=user_id).all()
+    for user_role in user_roles:
+        role = Role.query.get(user_role.role_id)
+        if role and role.id == 3:
+            return True
+    return False
+def get_subscription(staff_id):
+    # Fetch user role from UserRoles table
+    query = """
+        select t1.id,t2.id from school_subscription t1 inner join schools t2 on t2.id = t1.school_id inner join staffs t3  on t3.school_id = t2.id  and t1.status = true and t3.id = :staff_id
+    """
+    with Session(db.engine) as db_session: 
+        result = db_session.execute(
+            text(query), 
+            {"staff_id": staff_id}
+        ).fetchall()
+    session['subscription_id'] = result[0][0]
+    session['school_id'] = result[0][1]    
+     
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:
@@ -1213,26 +1258,30 @@ def get_menu_items():
 
     # Fetch menu items based on the school subscription and role
     query = """
-        SELECT m.id, m.menu_name, m.parent_id, m.is_active, m.is_visible_in_app
+        SELECT m.module_link, m.menu_name, m.parent_id, m.is_active, m.is_visible_in_app
         FROM modules m
         INNER JOIN school_subscription_module_role_permission ssmrp
             ON m.id = ssmrp.module_id
-        WHERE ssmrp.school_subscription_id = :school_subscription_id
-        AND ssmrp.role_id = :role_id
+        WHERE ssmrp.school_subscription_id = :school_subscription_id        
         AND m.is_active = TRUE
         AND m.is_visible_in_app = TRUE
-        ORDER BY m.parent_id, m.id
+        
     """
+    if not session.get('is_superadmin'):
+        query += " AND ssmrp.role_id = :role_id"
+
+    # Add ordering
+    query += " ORDER BY m.parent_id, m.id"
+
     with Session(db.engine) as db_session: 
         result = db_session.execute(
             text(query), 
             {"school_subscription_id": school_subscription_id, "role_id": user_role_id}
         ).fetchall()
-    print(school_subscription_id)
-    print(user_role_id)
+
     # Convert result to a JSON-friendly format
     menu_items = [
-        {"id": row[0], "menu_name": row[1], "parent_id": row[2]}
+        {"link": row[0], "menu_name": row[1], "parent_id": row[2]}
         for row in result
     ]
     return jsonify(menu_items)
@@ -1247,8 +1296,8 @@ def get_schools():
         return jsonify({"error": "User not authenticated"}), 403
 
     # Check if the user has the superadmin role
-    superadmin_role_id = 3  # Assuming 1 is the role ID for superadmin
-    if user_role_id != superadmin_role_id:
+     # Assuming 1 is the role ID for superadmin
+    if not session.get('is_superadmin'):
         return jsonify({"error": "Access denied"}), 403
 
     # Fetch schools from the database
@@ -1332,11 +1381,13 @@ def get_staffs():
 
 @app.route('/staffs/add', methods=['GET', 'POST'])
 def add_staff():
-    """Add a new staff member."""
+    """Add a new staff member with user and roles."""
     schools = School.query.all()
     staff_types = StaffType.query.all()
+    roles = Role.query.all()  # Fetch all available roles
 
     if request.method == 'POST':
+        # Staff details
         school_id = request.form.get('school_id')
         staff_type_id = request.form.get('staff_type_id')
         first_name = request.form.get('first_name')
@@ -1355,7 +1406,7 @@ def add_staff():
         relieving_comment = request.form.get('relieving_comment')
         status = request.form.get('status') == 'true'
 
-        # Create a new Staff object
+        # Create the Staff object
         new_staff = Staff(
             school_id=school_id,
             staff_type_id=staff_type_id,
@@ -1375,24 +1426,51 @@ def add_staff():
             relieving_comment=relieving_comment,
             status=status,
         )
-
-        # Add and commit the new staff to the database
         db.session.add(new_staff)
+        db.session.commit()
+
+        # User details
+        username = request.form.get('username')
+        password = request.form.get('password')  # In real apps, hash the password!
+        is_active = request.form.get('is_active') == 'on'
+        roles_selected = request.form.getlist('roles')  # List of selected role IDs
+
+        # Create the User object
+        new_user = User(
+            staff_id=new_staff.id,  # Link the new staff record
+            username=username,
+            password=password,
+            is_active=is_active,
+        )
+        db.session.add(new_user)
+        db.session.commit()
+
+        # Add roles to user_roles table
+        for role_id in roles_selected:
+            user_role = UserRole(user_id=new_user.id, role_id=role_id)
+            db.session.add(user_role)
+
         db.session.commit()
 
         return redirect(url_for('list_staffs'))
 
-    return render_template('staffs_form.html', schools=schools, staff_types=staff_types, staff=None)
+    return render_template('staffs_form.html', schools=schools, staff_types=staff_types, roles=roles, staff=None, user=None, assigned_roles=[])
+
 
 
 @app.route('/staffs/edit/<int:id>', methods=['GET', 'POST'])
 def edit_staff(id):
-    """Edit an existing staff member."""
+    """Edit an existing staff member with user and roles."""
     staff = Staff.query.get_or_404(id)
     schools = School.query.all()
     staff_types = StaffType.query.all()
+    roles = Role.query.all()
+
+    user = User.query.filter_by(staff_id=staff.id).first()
+    assigned_roles = [ur.role_id for ur in UserRole.query.filter_by(user_id=user.id).all()] if user else []
 
     if request.method == 'POST':
+        # Staff details
         staff.school_id = request.form.get('school_id')
         staff.staff_type_id = request.form.get('staff_type_id')
         staff.first_name = request.form.get('first_name')
@@ -1411,12 +1489,39 @@ def edit_staff(id):
         staff.relieving_comment = request.form.get('relieving_comment')
         staff.status = request.form.get('status') == 'true'
 
-        # Commit the updated staff to the database
+        # User details
+        username = request.form.get('username')
+        password = request.form.get('password')  # In real apps, hash the password!
+        is_active = request.form.get('is_active') == 'on'
+        roles_selected = request.form.getlist('roles')
+
+        # Update User object
+        if user:
+            user.username = username
+            user.password = password
+            user.is_active = is_active
+        else:  # Create a new user if not already linked
+            user = User(
+                staff_id=staff.id,
+                username=username,
+                password=password,
+                is_active=is_active,
+            )
+            db.session.add(user)
+            db.session.commit()
+
+        # Update user roles
+        UserRole.query.filter_by(user_id=user.id).delete()  # Clear existing roles
+        for role_id in roles_selected:
+            user_role = UserRole(user_id=user.id, role_id=role_id)
+            db.session.add(user_role)
+
         db.session.commit()
 
         return redirect(url_for('list_staffs'))
 
-    return render_template('staffs_form.html', schools=schools, staff_types=staff_types, staff=staff)
+    return render_template('staffs_form.html', schools=schools, staff_types=staff_types, roles=roles, staff=staff, user=user, assigned_roles=assigned_roles)
+
 
 
 @app.route('/staffs/delete/<int:id>', methods=['POST'])
@@ -1426,6 +1531,82 @@ def delete_staff(id):
     db.session.delete(staff)
     db.session.commit()
     return jsonify({"success": True})
+
+@app.route('/api/club', methods=['GET'])
+def get_clubs():
+    print("11111111111111111111111")
+    """API to fetch staff data for DataTable."""
+    clubs = Club.query.all()
+    data = [
+        {
+            "id": club.id,
+            "title": club.title,
+            "description": club.description,
+            "status": "Active" if club.status else "Inactive",
+        }
+        for club in clubs
+    ]
+    print(data)
+    return jsonify({"data": data})
+@app.route('/clubs/list', methods=['GET'])
+def list_clubs():
+    """Render the staff list page."""
+    return render_template('clubs_list.html')
+
+@app.route('/clubs/add', methods=['GET', 'POST'])
+def add_club():
+    school_id = session.get('school_id')  # Get school_id from session
+    if not school_id:
+        return jsonify({'error': 'School ID not found in session'}), 400
+
+    if request.method == 'POST':
+        title = request.form.get('title')
+        description = request.form.get('description')
+        status = request.form.get('status') == 'on'
+
+        new_club = Club(
+            school_id=school_id,
+            title=title,
+            description=description,
+            status=status
+        )
+        db.session.add(new_club)
+        db.session.commit()
+
+        return redirect(url_for('list_clubs'))
+
+    return render_template('clubs_form.html', club=None)
+
+@app.route('/clubs/edit/<int:id>', methods=['GET', 'POST'])
+def edit_club(id):
+    club = Club.query.get_or_404(id)
+
+    # Ensure the club belongs to the logged-in user's school
+    if club.school_id != session.get('school_id'):
+        return jsonify({'error': 'Unauthorized access'}), 403
+
+    if request.method == 'POST':
+        club.title = request.form.get('title')
+        club.description = request.form.get('description')
+        club.status = request.form.get('status') == 'on'
+
+        db.session.commit()
+        return redirect(url_for('list_clubs'))
+
+    return render_template('clubs_form.html', club=club)
+
+@app.route('/clubs/delete/<int:id>', methods=['POST'])
+def delete_club(id):
+    club = Club.query.get_or_404(id)
+
+    # Ensure the club belongs to the logged-in user's school
+    if club.school_id != session.get('school_id'):
+        return jsonify({'error': 'Unauthorized access'}), 403
+
+    db.session.delete(club)
+    db.session.commit()
+    return redirect(url_for('list_clubs'))
+
 
 if __name__ == '__main__':
     app.run(debug=True)
