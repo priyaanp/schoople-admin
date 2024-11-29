@@ -1,0 +1,27 @@
+
+<div class="dashboard-header">
+    <span class="app-name">My Dashboard</span>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            {% if session['is_superadmin'] %}
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item" id="school-select-container" style="display: none;">
+                    <select id="school-select" name="school_id" class="form-control">
+                        <option value="">Select School</option>
+                        {% for school in schools %}
+                            <option value="{{ school.id }}" {% if school.id == session['school_id'] %}selected{% endif %}>
+                                {{ school.title }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </li>
+            </ul>
+            {% endif %}
+
+        </div>
+    </nav>
+    <form action="/logout" method="POST" class="d-inline">
+        <button class="logout-btn">Logout</button>
+    </form>
+  </div>
+  

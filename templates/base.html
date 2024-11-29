@@ -1,45 +1,236 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subscription Management</title>
-	<style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+    <title>{% block title %}Page Title{% endblock %}</title>
+    
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <style>
+
+        .dashboard-header {
+        display: flex;
+        justify-content: space-between; /* Space between left and right items */
+        align-items: center; /* Vertically center items */
+        background-color: #343a40;
+        color: white;
+        padding: 10px 20px;
         }
-        .pagination {
-            margin-top: 20px;
+
+        .app-name {
+        font-size: 20px;
+        font-weight: bold;
         }
-        .pagination a, .pagination span {
-            margin: 0 5px;
-            padding: 8px 12px;
-            text-decoration: none;
-            color: #007bff;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+
+        .logout-btn {
+        background-color: #f8f9fa;
+        border: none;
+        color: #343a40;
+        padding: 8px 15px;
+        font-size: 16px;
+        cursor: pointer;
         }
-        .pagination a:hover {
-            background-color: #f1f1f1;
+
+        .logout-btn:hover {
+        background-color: #e2e6ea;
         }
-        .pagination .active {
-            background-color: #007bff;
+
+
+        .sidebar {
+            height: 100vh;
+            background-color: #343a40;
             color: white;
-            border: 1px solid #007bff;
+            position: fixed;
+            padding-top: 20px;
+            width: 150px;
+        }
+
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            display: block;
+        }
+
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+
+        .main {
+            margin-left: 150px;
+            padding: 20px;
+        }
+
+        .active-menu {
+            background-color: #495057;
+            color: white;
+            font-weight: bold;
+        }
+
+        footer {
+            background-color: #343a40;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .btn {
+            padding: 5px 10px;
+            margin: 2px;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-edit {
+            background-color: #007bff;
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
         }
     </style>
 </head>
+
 <body>
-    <header>
-        <h1>Subscription Management</h1>
-        <nav>
-            <a href="/subscription/list">Home</a>
-            <a href="/subscription/add">Add Subscription</a>
-        </nav>
-    </header>
-    <main>
-        {% block content %}{% endblock %}
-    </main>
+    <!-- Include Header -->
+    {% include 'header.html' %}
+
+    <div class="d-flex">
+        <!-- Include Left Menu -->
+        {% include 'left_menu.html' %}
+
+        <!-- Main Content -->
+        <div class="main">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+
+
+    {% block scripts %}{% endblock %}
+
 </body>
+{% block scriptsd %}
+<script>
+    // Function to fetch menu items from the backend
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Fetch the school subscription and populate menu
+        const schoolSelect = document.getElementById('school-select');
+        const menuList = document.getElementById('menu-list');
+
+        // On school selection, fetch the menu items
+        schoolSelect.addEventListener('change', function () {
+            const schoolSubscriptionId = this.value; // Selected school subscription ID
+
+            if (!schoolSubscriptionId) {
+                menuList.innerHTML = "<li>Please select a school</li>";
+                return;
+            }
+
+            // Fetch menu items from API
+            loadMenuItem(schoolSubscriptionId);
+        });
+    });
+
+
+
+
+
+    // Call the function on page load
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Check if the user is superadmin
+        const userRole = "{{ session['role_id'] }}";
+        const superadminRoleId = "{{ session['is_superadmin'] | tojson }}";
+        const school_id = "{{ session['school_id']}}";
+
+        if (superadminRoleId == 'true') {
+
+            // Make the dropdown visible
+            document.getElementById('school-select-container').style.display = 'block';
+
+            // Fetch the list of schools
+            fetch('/api/get_schools')
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch schools');
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    const schoolSelect = document.getElementById('school-select');
+                    data.forEach((school) => {
+                        const option = document.createElement('option');
+                        option.value = school.id;
+                        option.textContent = school.title;
+                        schoolSelect.appendChild(option);
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error fetching schools:', error);
+                });
+        } else {
+
+            loadMenuItem(school_id);
+        }
+    });
+
+    // Logout button action
+    document.getElementById('logout-button').addEventListener('click', function () {
+        window.location.href = '/logout'; // Redirect to logout
+    });
+
+    function loadMenuItem(school_id) {
+        fetch(`/api/get_menu_items?school_id=` + school_id)
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch menu items');
+                }
+                return response.json();
+            })
+            .then((data) => {
+                // Clear existing menu items
+                const menuItems = data;
+
+                // Check if there was an error
+                if (menuItems.error) {
+                    console.error(menuItems.error);
+                    return;
+                }
+
+                // Render the menu dynamically
+                const menuContainer = document.getElementById('menu-items');
+                menuContainer.innerHTML = ''; // Clear existing items
+
+                menuItems.forEach(item => {
+                    const menuLink = document.createElement('a');
+                    menuLink.href = `/${item.link}`; // Example link
+                    menuLink.innerText = item.menu_name;
+                    if (window.location.pathname === `/${item.link}`) {
+                        menuLink.className = "active-menu";
+                    }
+                    menuContainer.appendChild(menuLink);
+                });
+            })
+            .catch((error) => {
+                console.error('Error fetching menu items:', error);
+                menuList.innerHTML = "<li>Error loading menu</li>";
+            });
+    }
+
+</script>
+{% endblock %}
+<!-- Include Footer -->
+{% include 'footer.html' %}
+
 </html>

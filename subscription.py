@@ -1181,15 +1181,13 @@ def login():
         password = request.form['password']
 
         user = User.query.filter_by(username=username).first()
-        print("first")
-        print(user.staff_id)
-        print("second")
+  
         if user :
             session['user_id'] = user.id
             session['role'] = user_role(user.id)  # Fetch user's role dynamically
             session['role_id'] = user_role_id(user.id)  # Fetch user's role dynamically
             session['is_superadmin'] = is_superadmin(user.id) 
-           
+
             if(user.staff_id): 
                 get_subscription(user.staff_id) 
             
@@ -1204,8 +1202,18 @@ def user_role(user_id):
     return user_role[0] if user_role else None
 def user_role_id(user_id):
     # Fetch user role from UserRoles table
-    user_role = db.session.query(Role.id).join(UserRole, Role.id == UserRole.role_id).filter(UserRole.user_id == user_id).first()
-    return user_role[0] if user_role else None
+    user_roles = (
+        db.session.query(Role.id)
+        .join(UserRole, Role.id == UserRole.role_id)
+        .filter(UserRole.user_id == user_id)
+        .all()
+    )
+
+    # Store all roles in the session as a list
+    session['user_roles'] = [role[0] for role in user_roles]  # Extract role IDs
+
+    # Example return for verification
+    return session['user_roles']
 def is_superadmin(user_id):
     """Check if the logged-in user is a superadmin."""
     
@@ -1244,10 +1252,21 @@ def logout():
 
 @app.route('/api/get_menu_items', methods=['GET'])
 def get_menu_items():
-    school_subscription_id = request.args.get('school_subscription_id', type=int)
+    school_id = request.args.get('school_id', type=int)
+    session['school_id'] = school_id 
+
+    querySchool = """
+        select id from school_subscription where school_id = :school_id and status = true
+    """
+    with Session(db.engine) as db_session: 
+        result = db_session.execute(
+            text(querySchool), 
+            {"school_id": school_id}
+        ).fetchall()
+    school_subscription_id = result[0][0]
     if not school_subscription_id:
         school_subscription_id = 1
-    print(school_subscription_id)
+ 
     user_role_id = flask_session.get('role_id')
 
     if not user_role_id:
@@ -1258,32 +1277,47 @@ def get_menu_items():
 
     # Fetch menu items based on the school subscription and role
     query = """
-        SELECT m.module_link, m.menu_name, m.parent_id, m.is_active, m.is_visible_in_app
+        SELECT distinct m.id, m.module_link, m.menu_name, m.parent_id, m.is_active, m.is_visible_in_app,p.permission_name
         FROM modules m
         INNER JOIN school_subscription_module_role_permission ssmrp
             ON m.id = ssmrp.module_id
+        INNER JOIN permissions p on p.id = ssmrp.permission_id    
         WHERE ssmrp.school_subscription_id = :school_subscription_id        
         AND m.is_active = TRUE
         AND m.is_visible_in_app = TRUE
         
     """
     if not session.get('is_superadmin'):
-        query += " AND ssmrp.role_id = :role_id"
+        query += " AND ssmrp.role_id IN :role_id"
 
     # Add ordering
-    query += " ORDER BY m.parent_id, m.id"
+    query += " ORDER BY m.id"
+    print(user_role_id)
+    print(school_subscription_id)
+    print(query)
 
     with Session(db.engine) as db_session: 
         result = db_session.execute(
             text(query), 
-            {"school_subscription_id": school_subscription_id, "role_id": user_role_id}
+            {"school_subscription_id": school_subscription_id, "role_id": tuple(user_role_id)}
         ).fetchall()
 
     # Convert result to a JSON-friendly format
+    seen_menu_names = set()
     menu_items = [
-        {"link": row[0], "menu_name": row[1], "parent_id": row[2]}
+        {"link": row[1], "menu_name": row[2], "parent_id": row[3], "permission_name": row[6]}
         for row in result
+        if row[2] not in seen_menu_names and not seen_menu_names.add(row[2])  # Check and add to set
     ]
+    print("1111111111111")
+    print(menu_items)
+    # Create a map (dictionary) with menu_name as key and permission_name as value
+    menu_permission_map = {item['menu_name']: item['permission_name'] for item in menu_items}
+
+    # Now you can store the 'menu_permission_map' in session if needed
+    session['menu_permission_map'] = menu_permission_map
+    print("222222")
+    print(menu_permission_map)
     return jsonify(menu_items)
 
 
@@ -1359,13 +1393,15 @@ def delete_staff_type(id):
 
 @app.route('/staffs/list', methods=['GET'])
 def list_staffs():
-    """Render the staff list page."""
+    selected_school_id = session.get('school_id')
+    print(selected_school_id)
     return render_template('staffs_list.html')
 
 @app.route('/api/staffs', methods=['GET'])
 def get_staffs():
     """API to fetch staff data for DataTable."""
-    staffs = Staff.query.all()
+    staffs = Staff.query.filter_by(school_id=session.get('school_id')).all()
+
     data = [
         {
             "id": staff.id,
@@ -1388,7 +1424,7 @@ def add_staff():
 
     if request.method == 'POST':
         # Staff details
-        school_id = request.form.get('school_id')
+        school_id = session.get('school_id')
         staff_type_id = request.form.get('staff_type_id')
         first_name = request.form.get('first_name')
         middle_name = request.form.get('middle_name')
@@ -1471,7 +1507,7 @@ def edit_staff(id):
 
     if request.method == 'POST':
         # Staff details
-        staff.school_id = request.form.get('school_id')
+        staff.school_id = session.get('school_id')
         staff.staff_type_id = request.form.get('staff_type_id')
         staff.first_name = request.form.get('first_name')
         staff.middle_name = request.form.get('middle_name')
@@ -1533,8 +1569,7 @@ def delete_staff(id):
     return jsonify({"success": True})
 
 @app.route('/api/club', methods=['GET'])
-def get_clubs():
-    print("11111111111111111111111")
+def get_clubs():   
     """API to fetch staff data for DataTable."""
     clubs = Club.query.all()
     data = [
@@ -1546,7 +1581,7 @@ def get_clubs():
         }
         for club in clubs
     ]
-    print(data)
+
     return jsonify({"data": data})
 @app.route('/clubs/list', methods=['GET'])
 def list_clubs():
@@ -1606,6 +1641,9 @@ def delete_club(id):
     db.session.delete(club)
     db.session.commit()
     return redirect(url_for('list_clubs'))
+
+
+
 
 
 if __name__ == '__main__':
