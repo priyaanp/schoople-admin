@@ -1070,7 +1070,7 @@ def api_modules():
     filtered_records = query.count()
 
     # Pagination
-    modules = query.offset(start).limit(length).all()
+    modules = query.order_by(Module.priority).offset(start).limit(length).all()
 
     # Format data for DataTables
     data = [
@@ -1080,7 +1080,8 @@ def api_modules():
             "menu_name": module.menu_name,
             "parent": module.parent.module_name if module.parent else "None",
             "is_active": "Active" if module.is_active else "Inactive",
-            "is_visible_in_app": "Yes" if module.is_visible_in_app else "No"
+            "is_visible_in_app": "Yes" if module.is_visible_in_app else "No",
+            "priority": module.priority,
         }
         for module in modules
     ]
@@ -1101,6 +1102,7 @@ def add_module():
         parent_id = parent_id if parent_id else None  # Set to NULL if not provided
         is_active = request.form.get('is_active') == 'on'
         is_visible_in_app = request.form.get('is_visible_in_app') == 'on'
+        priority =  request.form['priority']
 
         # Create a new module
         new_module = Module(
@@ -1109,7 +1111,8 @@ def add_module():
             module_link=module_link,
             parent_id=parent_id,
             is_active=is_active,
-            is_visible_in_app=is_visible_in_app
+            is_visible_in_app=is_visible_in_app,
+            priority=priority
         )
         db.session.add(new_module)
         db.session.commit()
@@ -1133,6 +1136,7 @@ def edit_module(id):
         module.parent_id = parent_id if parent_id else None  # Set to NULL if not selected
         module.is_active = request.form.get('is_active') == 'on'
         module.is_visible_in_app = request.form.get('is_visible_in_app') == 'on'
+        module.priority = request.form['priority']
 
         db.session.commit()
         return redirect(url_for('modules'))
@@ -1237,7 +1241,11 @@ def get_subscription(staff_id):
         ).fetchall()
     session['subscription_id'] = result[0][0]
     session['school_id'] = result[0][1]    
-     
+def checkLoggedin():
+    
+    if not session.get('user_id'):  # 'logged_in' is the session key for login status
+        return render_template('login.html')
+ # Redirect to login page if not logged in     
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:
@@ -1277,24 +1285,21 @@ def get_menu_items():
 
     # Fetch menu items based on the school subscription and role
     query = """
-        SELECT distinct m.id, m.module_link, m.menu_name, m.parent_id, m.is_active, m.is_visible_in_app,p.permission_name
+        SELECT distinct m.id, m.module_link, m.menu_name, m.parent_id, m.is_active, m.is_visible_in_app,p.permission_name,m.priority
         FROM modules m
         INNER JOIN school_subscription_module_role_permission ssmrp
             ON m.id = ssmrp.module_id
         INNER JOIN permissions p on p.id = ssmrp.permission_id    
         WHERE ssmrp.school_subscription_id = :school_subscription_id        
-        AND m.is_active = TRUE
-        AND m.is_visible_in_app = TRUE
+        AND m.is_active = TRUE       
         
     """
     if not session.get('is_superadmin'):
         query += " AND ssmrp.role_id IN :role_id"
 
     # Add ordering
-    query += " ORDER BY m.id"
-    print(user_role_id)
-    print(school_subscription_id)
-    print(query)
+    query += " ORDER BY m.priority"
+
 
     with Session(db.engine) as db_session: 
         result = db_session.execute(
@@ -1309,15 +1314,13 @@ def get_menu_items():
         for row in result
         if row[2] not in seen_menu_names and not seen_menu_names.add(row[2])  # Check and add to set
     ]
-    print("1111111111111")
-    print(menu_items)
+
     # Create a map (dictionary) with menu_name as key and permission_name as value
     menu_permission_map = {item['menu_name']: item['permission_name'] for item in menu_items}
 
     # Now you can store the 'menu_permission_map' in session if needed
     session['menu_permission_map'] = menu_permission_map
-    print("222222")
-    print(menu_permission_map)
+
     return jsonify(menu_items)
 
 
@@ -1392,9 +1395,12 @@ def delete_staff_type(id):
     return jsonify({"success": True})
 
 @app.route('/staffs/list', methods=['GET'])
-def list_staffs():
+def list_staffs():    
+    login_redirect = checkLoggedin()
+    if login_redirect:
+        return login_redirect 
     selected_school_id = session.get('school_id')
-    print(selected_school_id)
+
     return render_template('staffs_list.html')
 
 @app.route('/api/staffs', methods=['GET'])

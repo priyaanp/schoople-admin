@@ -1,23 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ 'Edit' if staff else 'Add' }} Staff</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container mt-5">
-        <h1>{{ 'Edit' if staff else 'Add' }} Staff</h1>
-        <form action="{{ url_for('edit_staff', id=staff.id) if staff else url_for('add_staff') }}" method="POST">
-            <!-- School -->
+{% extends 'baseform.html' %}
 
-            <!-- Staff Type -->
-            <div class="mb-3">
+{% block title %}Add Staffs{% endblock %}
+
+{% block content %}
+<div class="container mt-5 form-field-container">
+    <div class="form-page-header">
+        <h4>{{ 'Edit' if staff else 'Add' }} Staff</h4>
+    </div>
+    <form action="{{ url_for('edit_staff', id=staff.id) if staff else url_for('add_staff') }}" method="POST">
+        <!-- School -->
+
+        <!-- Staff Type -->
+        <fieldset>
+            <legend>Basic Details</legend>
+            <div class="mb-3 form-el-div-wraper">
                 <label for="staff_type_id" class="form-label">Staff Type</label>
                 <select class="form-control" id="staff_type_id" name="staff_type_id" required>
                     {% for staff_type in staff_types %}
-                    <option value="{{ staff_type.id }}" {{ 'selected' if staff and staff.staff_type_id == staff_type.id else '' }}>
+                    <option value="{{ staff_type.id }}" {{ 'selected' if staff and staff.staff_type_id==staff_type.id
+                        else '' }}>
                         {{ staff_type.title }}
                     </option>
                     {% endfor %}
@@ -25,181 +26,156 @@
             </div>
 
             <!-- First Name -->
-            <div class="mb-3">
+            <div class="mb-3 form-el-div-wraper">
                 <label for="first_name" class="form-label">First Name</label>
-                <input 
-                    type="text" 
-                    class="form-control" 
-                    id="first_name" 
-                    name="first_name" 
-                    value="{{ staff.first_name if staff else '' }}" 
-                    required>
+                <input type="text" class="form-control" id="first_name" name="first_name"
+                    value="{{ staff.first_name if staff else '' }}" required>
             </div>
 
             <!-- Middle Name -->
-            <div class="mb-3">
+            <div class="mb-3 form-el-div-wraper">
                 <label for="middle_name" class="form-label">Middle Name</label>
-                <input 
-                    type="text" 
-                    class="form-control" 
-                    id="middle_name" 
-                    name="middle_name" 
+                <input type="text" class="form-control" id="middle_name" name="middle_name"
                     value="{{ staff.middle_name if staff else '' }}">
             </div>
 
-            <!-- Last Name -->
-            <div class="mb-3">
-                <label for="last_name" class="form-label">Last Name</label>
-                <input 
-                    type="text" 
-                    class="form-control" 
-                    id="last_name" 
-                    name="last_name" 
-                    value="{{ staff.last_name if staff else '' }}" 
-                    required>
-            </div>
+        <!-- Last Name -->
+        <div class="mb-3 form-el-div-wraper">
+            <label for="last_name" class="form-label">Last Name</label>
+            <input type="text" class="form-control" id="last_name" name="last_name"
+                value="{{ staff.last_name if staff else '' }}" required>
+        </div>
 
-            <!-- Permanent Address -->
-            <div class="mb-3">
-                <label for="permanent_address" class="form-label">Permanent Address</label>
-                <textarea 
-                    class="form-control" 
-                    id="permanent_address" 
-                    name="permanent_address">{{ staff.permanent_address if staff else '' }}</textarea>
-            </div>
+        <!-- Permanent Address -->
+        <div class="mb-3 form-el-div-wraper">
+            <label for="permanent_address" class="form-label">Permanent Address</label>
+            <textarea class="form-control" id="permanent_address"
+                name="permanent_address">{{ staff.permanent_address if staff else '' }}</textarea>
+        </div>
 
-            <!-- Communication Address -->
-            <div class="mb-3">
-                <label for="communication_address" class="form-label">Communication Address</label>
-                <textarea 
-                    class="form-control" 
-                    id="communication_address" 
-                    name="communication_address">{{ staff.communication_address if staff else '' }}</textarea>
-            </div>
+        <!-- Communication Address -->
+        <div class="mb-3 form-el-div-wraper">
+            <label for="communication_address" class="form-label">Communication Address</label>
+            <textarea class="form-control" id="communication_address"
+                name="communication_address">{{ staff.communication_address if staff else '' }}</textarea>
+        </div>
 
-            <!-- Blood Group -->
-            <div class="mb-3">
-                <label for="blood_group" class="form-label">Blood Group</label>
-                <input 
-                    type="text" 
-                    class="form-control" 
-                    id="blood_group" 
-                    name="blood_group" 
-                    value="{{ staff.blood_group if staff else '' }}">
-            </div>
+        <!-- Blood Group -->
+        <div class="mb-3 form-el-div-wraper">
+            <label for="blood_group" class="form-label">Blood Group</label>
+            <input type="text" class="form-control" id="blood_group" name="blood_group"
+                value="{{ staff.blood_group if staff else '' }}">
+        </div>
 
-            <!-- Qualification -->
-            <div class="mb-3">
-                <label for="qualification" class="form-label">Qualification</label>
-                <input 
-                    type="text" 
-                    class="form-control" 
-                    id="qualification" 
-                    name="qualification" 
-                    value="{{ staff.qualification if staff else '' }}">
-            </div>
+        <!-- Qualification -->
+        <div class="mb-3 form-el-div-wraper">
+            <label for="qualification" class="form-label">Qualification</label>
+            <input type="text" class="form-control" id="qualification" name="qualification"
+                value="{{ staff.qualification if staff else '' }}">
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>Incharge Details</legend>
+        <!-- Section In-Charge -->
+        <div class="mb-3 form-el-div-wraper">
+            <label for="is_section_in_charge" class="form-label">Section In-Charge</label>
+            <select class="form-control" id="is_section_in_charge" name="is_section_in_charge">
+                <option value="true" {{ 'selected' if staff and staff.is_section_in_charge else '' }}>Yes</option>
+                <option value="false" {{ 'selected' if staff and not staff.is_section_in_charge else '' }}>No</option>
+            </select>
+        </div>
 
-            <!-- Section In-Charge -->
-            <div class="mb-3">
-                <label for="is_section_in_charge" class="form-label">Section In-Charge</label>
-                <select class="form-control" id="is_section_in_charge" name="is_section_in_charge">
-                    <option value="true" {{ 'selected' if staff and staff.is_section_in_charge else '' }}>Yes</option>
-                    <option value="false" {{ 'selected' if staff and not staff.is_section_in_charge else '' }}>No</option>
-                </select>
-            </div>
+        <!-- Section Details -->
+        <div class="mb-3 form-el-div-wraper">
+            <label for="section_details" class="form-label">Section Details</label>
+            <textarea class="form-control" id="section_details"
+                name="section_details">{{ staff.section_details if staff else '' }}</textarea>
+        </div>
 
-            <!-- Section Details -->
-            <div class="mb-3">
-                <label for="section_details" class="form-label">Section Details</label>
-                <textarea 
-                    class="form-control" 
-                    id="section_details" 
-                    name="section_details">{{ staff.section_details if staff else '' }}</textarea>
-            </div>
+        <!-- Transport In-Charge -->
+        <div class="mb-3 form-el-div-wraper">
+            <label for="is_transport_in_charge" class="form-label">Transport In-Charge</label>
+            <select class="form-control" id="is_transport_in_charge" name="is_transport_in_charge">
+                <option value="true" {{ 'selected' if staff and staff.is_transport_in_charge else '' }}>Yes</option>
+                <option value="false" {{ 'selected' if staff and not staff.is_transport_in_charge else '' }}>No</option>
+            </select>
+        </div>
 
-            <!-- Transport In-Charge -->
-            <div class="mb-3">
-                <label for="is_transport_in_charge" class="form-label">Transport In-Charge</label>
-                <select class="form-control" id="is_transport_in_charge" name="is_transport_in_charge">
-                    <option value="true" {{ 'selected' if staff and staff.is_transport_in_charge else '' }}>Yes</option>
-                    <option value="false" {{ 'selected' if staff and not staff.is_transport_in_charge else '' }}>No</option>
-                </select>
-            </div>
+        <!-- Transport Details -->
+        <div class="mb-3 form-el-div-wraper">
+            <label for="transport_details" class="form-label">Transport Details</label>
+            <textarea class="form-control" id="transport_details"
+                name="transport_details">{{ staff.transport_details if staff else '' }}</textarea>
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>User status</legend>
+        <!-- Joining Date -->
+        <div class="mb-3 form-el-div-wraper">
+            <label for="joining_date" class="form-label">Joining Date</label>
+            <input type="date" class="form-control" id="joining_date" name="joining_date"
+                value="{{ staff.joining_date if staff else '' }}">
+        </div>
 
-            <!-- Transport Details -->
-            <div class="mb-3">
-                <label for="transport_details" class="form-label">Transport Details</label>
-                <textarea 
-                    class="form-control" 
-                    id="transport_details" 
-                    name="transport_details">{{ staff.transport_details if staff else '' }}</textarea>
-            </div>
+        <!-- Relieving Date -->
+        <div class="mb-3 form-el-div-wraper">
+            <label for="relieving_date" class="form-label">Relieving Date</label>
+            <input type="date" class="form-control" id="relieving_date" name="relieving_date"
+                value="{{ staff.relieving_date if staff else '' }}">
+        </div>
 
-            <!-- Joining Date -->
-            <div class="mb-3">
-                <label for="joining_date" class="form-label">Joining Date</label>
-                <input 
-                    type="date" 
-                    class="form-control" 
-                    id="joining_date" 
-                    name="joining_date" 
-                    value="{{ staff.joining_date if staff else '' }}">
-            </div>
+        <!-- Relieving Comment -->
+        <div class="mb-3 form-el-div-wraper">
+            <label for="relieving_comment" class="form-label">Relieving Comment</label>
+            <textarea class="form-control" id="relieving_comment"
+                name="relieving_comment">{{ staff.relieving_comment if staff else '' }}</textarea>
+        </div>
+    
+        <!-- Status -->
+        <div class="mb-3 form-el-div-wraper">
+            <label for="status" class="form-label">Status</label>
+            <select class="form-control" id="status" name="status">
+                <option value="true" {{ 'selected' if staff and staff.status else '' }}>Active</option>
+                <option value="false" {{ 'selected' if staff and not staff.status else '' }}>Inactive</option>
+            </select>
+        </div>
+    </fieldset>
 
-            <!-- Relieving Date -->
-            <div class="mb-3">
-                <label for="relieving_date" class="form-label">Relieving Date</label>
-                <input 
-                    type="date" 
-                    class="form-control" 
-                    id="relieving_date" 
-                    name="relieving_date" 
-                    value="{{ staff.relieving_date if staff else '' }}">
+    
+        <!-- User Fields -->
+        <h3></h3>
+            <fieldset>
+                <legend>Login Details</legend>
+                <div class="mb-3 form-el-div-wraper">
+                <label for="username" class="form-label">Username:</label>
+                <input class="form-control" type="text" name="username" value="{{ user and user.username }}" required>
+                <label>Password:
+                    <input type="password" name="password" value="{{ user and user.password }}" required>
+                </label><br>
+                <label>Status:
+                    <input type="checkbox" name="is_active" {% if user and user.is_active %}checked{% endif %}>
+                </label>
             </div>
-
-            <!-- Relieving Comment -->
-            <div class="mb-3">
-                <label for="relieving_comment" class="form-label">Relieving Comment</label>
-                <textarea 
-                    class="form-control" 
-                    id="relieving_comment" 
-                    name="relieving_comment">{{ staff.relieving_comment if staff else '' }}</textarea>
-            </div>
-
-            <!-- Status -->
-            <div class="mb-3">
-                <label for="status" class="form-label">Status</label>
-                <select class="form-control" id="status" name="status">
-                    <option value="true" {{ 'selected' if staff and staff.status else '' }}>Active</option>
-                    <option value="false" {{ 'selected' if staff and not staff.status else '' }}>Inactive</option>
-                </select>
-            </div>
-<!-- User Fields -->
-<h3>User Details</h3>
-<div class="mb-3">
-<label for="username"  class="form-label">Username:</label>
-    <input class="form-control" type="text" name="username" value="{{ user and user.username }}" required>
-<div>
-<label>Password:
-    <input type="password" name="password" value="{{ user and user.password }}" required>
-</label><br>
-<label>Status:
-    <input type="checkbox" name="is_active" {% if user and user.is_active %}checked{% endif %}>
-</label><br>
-
-<!-- Role Fields -->
-<h3>Roles</h3>
-{% for role in roles %}
-    <label>
-        <input type="checkbox" name="roles" value="{{ role.id }}" 
-        {% if role.id in assigned_roles %}checked{% endif %}>
-        {{ role.role_name }}
-    </label><br>
-{% endfor %}
-            <!-- Submit Button -->
-            <button type="submit" class="btn btn-primary">{{ 'Save' if staff else 'Add' }}</button>
-            <a href="/staffs/list" class="btn btn-secondary">Cancel</a>
-        </form>
-    </div>
-</body>
-</html>
+            </fieldset>
+                <!-- Role Fields -->
+                <fieldset>
+                    <legend>Role Assignement</legend>
+                    <div class="mb-3 form-el-div-wraper">
+                    {% for role in roles %}
+                    <label>
+                        <input type="checkbox" name="roles" value="{{ role.id }}" {% if role.id in assigned_roles
+                            %}checked{% endif %}>
+                        {{ role.role_name }}
+                    </label><br>
+                    {% endfor %}
+                    </div>
+                </fieldset>
+                <!-- Submit Button -->
+                 <div class="button-container">
+                    <button type="submit" class="btn btn-primary">{{ 'Save' if staff else 'Add' }}</button>
+                    <a href="/staffs/list" class="btn btn-secondary">Cancel</a>
+                 </div>
+                
+    </form>
+</div>
+{% endblock %}

@@ -16,10 +16,10 @@
             <tr>
                 <th>#</th>
                 <th>Module Name</th>
-                <th>Menu Name</th>
-                <th>Parent Module</th>
+                <th>Menu Name</th>                
                 <th>Status</th>
                 <th>Visible in App</th>
+                <th>Priority</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -40,10 +40,10 @@
                         render: (data, type, row, meta) => meta.row + 1 // Serial number
                     },
                     { data: 'module_name' },
-                    { data: 'menu_name' },
-                    { data: 'parent' },
+                    { data: 'menu_name' },                   
                     { data: 'is_active' },
                     { data: 'is_visible_in_app' },
+                    { data: 'priority' },
                     {
                         data: 'id',
                         render: (data) => `

@@ -1,5 +1,5 @@
-{% extends 'base.html' %}
-{% block content %}
+
+
 <h2>{{ subscription and "Edit Subscription" or "Add Subscription" }}</h2>
 <form method="post">
     <label>Title: <input type="text" name="title" value="{{ subscription and subscription.title }}"></label><br>
@@ -12,4 +12,4 @@
     <label>Status: <input type="checkbox" name="status" {% if subscription and subscription.status %}checked{% endif %}></label><br>
     <button type="submit">Save</button>
 </form>
-{% endblock %}
+

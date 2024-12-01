@@ -121,6 +121,7 @@ class Module(db.Model):
     parent_id = db.Column(db.Integer, db.ForeignKey('modules.id'), nullable=True)  # Allow null for parent_id
     is_active = db.Column(db.Boolean, default=True)
     is_visible_in_app = db.Column(db.Boolean, default=True)
+    priority = db.Column(db.Integer)  # Allow null for parent_id
 
     parent = db.relationship('Module', remote_side=[id], backref=db.backref('children', lazy='dynamic'))
 

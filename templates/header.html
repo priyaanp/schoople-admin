@@ -1,27 +1,33 @@
 
 <div class="dashboard-header">
-    <span class="app-name">My Dashboard</span>
-    <nav class="navbar navbar-dark bg-dark">
+    <div class="logo">
+        <a href="/dashboard"><img src="{{ url_for('static', filename='images/SCHOOPLE.png') }}"></a>
+    </div>
+    
+    <nav class="navbar">
         <div class="container-fluid">
-            {% if session['is_superadmin'] %}
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item" id="school-select-container" style="display: none;">
-                    <select id="school-select" name="school_id" class="form-control">
-                        <option value="">Select School</option>
-                        {% for school in schools %}
-                            <option value="{{ school.id }}" {% if school.id == session['school_id'] %}selected{% endif %}>
-                                {{ school.title }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </li>
-            </ul>
-            {% endif %}
-
+            <div class="action-container">
+                {% if session['is_superadmin'] %}
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item" id="school-select-container" style="display: none;">
+                        <select id="school-select" name="school_id" class="form-control">
+                            <option value="">Select School</option>
+                            {% for school in schools %}
+                                <option value="{{ school.id }}">
+                                    {{ school.title }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </li>
+                </ul>
+                {% endif %}
+                <form action="/logout" method="POST" class="d-inline">
+                    <button class="logout-btn">Logout</button>
+                </form>
+            </div>
+            
         </div>
     </nav>
-    <form action="/logout" method="POST" class="d-inline">
-        <button class="logout-btn">Logout</button>
-    </form>
+    
   </div>
   

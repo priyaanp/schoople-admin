@@ -33,6 +33,8 @@
         <label>Visible in App:
             <input type="checkbox" name="is_visible_in_app" {% if module and module.is_visible_in_app %}checked{% endif %}>
         </label><br>
+        <label>Priority:
+        <input type="text" name="priority" value="{{ module and module.priority }}"></label><br>
         <button type="submit">Save</button>
     </form>
 </body>

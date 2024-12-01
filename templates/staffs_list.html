@@ -3,9 +3,16 @@
 {% block title %}Staffs{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h1>Staffs</h1>
-    <a href="/staffs/add" class="btn btn-edit">Add Staff</a>
+<div class="data-table-wraper">
+    <div class="data-table-header">
+        <div class="data-table-header-text">
+            <h4>Staff</h4>
+        </div>
+        <div class="data-table-header-add-new">
+            <button style="font-size:18px"><a href="/staffs/add">Add <i class="fa fa-plus-circle"></i></a></button>
+        </div>
+        
+    </div>
     <table id="staffsTable" class="display">
         <thead>
             <tr>
@@ -14,7 +21,7 @@
                 <th>Staff Type</th>
                 <th>First Name</th>
                 <th>Last Name</th>
-                <th>Status</th>
+                <th>Status</th>                
                 <th>Actions</th>
             </tr>
         </thead>
@@ -27,7 +34,7 @@
     $(document).ready(function () {
         var permissionName = "{{ session['menu_permission_map'].get('Staffs') }}";
         var superadminRoleId = "{{ session['is_superadmin'] | tojson }}";
-        alert(permissionName)
+        
         $('#staffsTable').DataTable({
             ajax: '/api/staffs',
             columns: [
