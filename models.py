@@ -229,3 +229,80 @@ class Student(db.Model):
 
     def __repr__(self):
         return f"<Student(id={self.id}, name={self.first_name} {self.last_name}, school_id={self.school_id})>"
+
+class Grade(db.Model):
+    __tablename__ = 'grades'
+
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
+    title = db.Column(db.String, nullable=False)
+
+    # Relationship with the School model
+    school = db.relationship('School', backref='grades')
+
+    def __repr__(self):
+        return f"<Grade(id={self.id}, title={self.title})>"
+
+class Section(db.Model):
+    __tablename__ = 'sections'
+
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
+    title = db.Column(db.String, nullable=False)
+
+    # Relationship with the School model
+    school = db.relationship('School', backref='sections')
+
+    def __repr__(self):
+        return f"<Section(id={self.id}, title={self.title})>"
+    
+class SchoolsGradesSections(db.Model):
+    __tablename__ = 'schools_grades_sections'
+
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
+    grade_id = db.Column(db.Integer, db.ForeignKey('grades.id'), nullable=False)
+    section_id = db.Column(db.Integer, db.ForeignKey('sections.id'), nullable=False)
+    academic_year_id = db.Column(db.Integer, db.ForeignKey('academic_years.id'), nullable=False)
+
+    school = db.relationship('School', backref='grades_sections')
+    grade = db.relationship('Grade', backref='grades_sections')
+    section = db.relationship('Section', backref='grades_sections')
+    academic_year = db.relationship('AcademicYear', backref='grades_sections')
+
+    def __repr__(self):
+        return f"<SchoolsGradesSections(id={self.id})>"
+
+class House(db.Model):
+    __tablename__ = 'houses'
+
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
+    title = db.Column(db.String, nullable=False)
+    description = db.Column(db.String, nullable=True)
+    color = db.Column(db.String, nullable=True)
+    status = db.Column(db.Boolean, default=True)
+
+    school = db.relationship('School', backref='houses')
+
+    def __repr__(self):
+        return f"<House(id={self.id}, title={self.title}, school_id={self.school_id})>"
+
+class Transport(db.Model):
+    __tablename__ = 'transports'
+
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
+    driver_id = db.Column(db.Integer, db.ForeignKey('staffs.id'), nullable=False)
+    driver_code = db.Column(db.String, nullable=False)
+    vehicle_number = db.Column(db.String, nullable=False)
+    route_number = db.Column(db.String, nullable=False)
+    route_name = db.Column(db.String, nullable=False)
+    vehicle_gps_device_id = db.Column(db.String, nullable=True)
+    vehicle_tracking_url = db.Column(db.String, nullable=True)
+    in_charge_id = db.Column(db.Integer, db.ForeignKey('staffs.id'), nullable=False)
+
+    # Relationships
+    driver = db.relationship('Staff', foreign_keys=[driver_id])
+    in_charge = db.relationship('Staff', foreign_keys=[in_charge_id])
+    school = db.relationship('School', backref='transports')

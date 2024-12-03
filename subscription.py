@@ -3,7 +3,7 @@ from flask import session as flask_session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text 
-from models import Club, Student, db, Offer,Subscription,Role,User,UserRole,Permission,School,AcademicYear,SchoolSubscription,Module,SchoolSubscriptionModuleRolePermission,StaffType,Staff
+from models import Club, Grade, House, SchoolsGradesSections, Section, Student, Transport, db, Offer,Subscription,Role,User,UserRole,Permission,School,AcademicYear,SchoolSubscription,Module,SchoolSubscriptionModuleRolePermission,StaffType,Staff
 
 from config import DevelopmentConfig, TestingConfig, ProductionConfig
 
@@ -1805,6 +1805,388 @@ def delete_student(id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 400
+
+@app.route('/grades/list', methods=['GET'])
+def grades_list():
+    """Render the grades list page."""
+    return render_template('grades_list.html')
+
+
+@app.route('/api/grades', methods=['GET'])
+def grades_data():
+    """Fetch and return grades data for DataTables."""
+    grades = Grade.query.join(School, Grade.school_id == School.id).all()
+    data = [
+        {
+            "id": grade.id,
+            "school": grade.school.title,  # Assuming a relationship to the `School` table
+            "title": grade.title
+        }
+        for grade in grades
+    ]
+    return jsonify({"data": data})
+
+
+@app.route('/grades/add', methods=['GET', 'POST'])
+def add_grade():
+    """Add a new grade."""
+    if request.method == 'POST':
+        grade = Grade(
+            school_id=session.get('school_id'),  # Fetch the current school ID from the session
+            title=request.form['title']
+        )
+        db.session.add(grade)
+        db.session.commit()
+        return redirect('/grades/list')
+
+    return render_template('grades_form.html', grade=None)
+
+
+@app.route('/grades/edit/<int:id>', methods=['GET', 'POST'])
+def edit_grade(id):
+    """Edit an existing grade."""
+    grade = Grade.query.get_or_404(id)
+
+    if request.method == 'POST':
+        grade.title = request.form['title']
+        db.session.commit()
+        return redirect('/grades/list')
+
+    return render_template('grades_form.html', grade=grade)
+
+
+@app.route('/grades/delete/<int:id>', methods=['POST'])
+def delete_grade(id):
+    """Delete a grade."""
+    grade = Grade.query.get_or_404(id)
+    db.session.delete(grade)
+    db.session.commit()
+    return jsonify({"message": "Grade deleted successfully"})
+
+
+@app.route('/sections/list', methods=['GET'])
+def sections_list():
+    """Render the sections list page."""
+    return render_template('sections_list.html')
+
+
+@app.route('/api/sections', methods=['GET'])
+def sections_data():
+    """Fetch and return sections data for DataTables."""
+    sections = Section.query.join(School, Section.school_id == School.id).all()
+    data = [
+        {
+            "id": section.id,
+            "school": section.school.title,  # Assuming a relationship to the `School` table
+            "title": section.title
+        }
+        for section in sections
+    ]
+    return jsonify({"data": data})
+
+
+@app.route('/sections/add', methods=['GET', 'POST'])
+def add_section():
+    """Add a new section."""
+    if request.method == 'POST':
+        section = Section(
+            school_id=session.get('school_id'),  # Fetch the current school ID from the session
+            title=request.form['title']
+        )
+        db.session.add(section)
+        db.session.commit()
+        return redirect('/sections/list')
+
+    return render_template('sections_form.html', section=None)
+
+
+@app.route('/sections/edit/<int:id>', methods=['GET', 'POST'])
+def edit_section(id):
+    """Edit an existing section."""
+    section = Section.query.get_or_404(id)
+
+    if request.method == 'POST':
+        section.title = request.form['title']
+        db.session.commit()
+        return redirect('/sections/list')
+
+    return render_template('sections_form.html', section=section)
+
+
+@app.route('/sections/delete/<int:id>', methods=['POST'])
+def delete_section(id):
+    """Delete a section."""
+    section = Section.query.get_or_404(id)
+    db.session.delete(section)
+    db.session.commit()
+    return jsonify({"message": "Section deleted successfully"})
+
+
+@app.route('/schools-grades-sections/list', methods=['GET'])
+def schools_grades_sections_list():
+    """Render the list page for schools_grades_sections."""
+    return render_template('schools_grades_sections_list.html')
+
+
+@app.route('/api/schools-grades-sections', methods=['GET'])
+def schools_grades_sections_data():
+    """Fetch and return data for the schools_grades_sections table."""
+    sections = (
+        db.session.query(
+            SchoolsGradesSections.id,
+            School.title.label('school'),
+            Grade.title.label('grade'),
+            Section.title.label('section'),
+            AcademicYear.start_date,
+            AcademicYear.end_date
+        )
+        .join(School, SchoolsGradesSections.school_id == School.id)
+        .join(Grade, SchoolsGradesSections.grade_id == Grade.id)
+        .join(Section, SchoolsGradesSections.section_id == Section.id)
+        .join(AcademicYear, SchoolsGradesSections.academic_year_id == AcademicYear.id)
+        .all()
+    )
+
+    data = [
+        {
+            "id": section.id,
+            "school": section.school,
+            "grade": section.grade,
+            "section": section.section,
+            "academic_year": f"{section.start_date} - {section.end_date}"
+        }
+        for section in sections
+    ]
+
+    return jsonify({"data": data})
+
+
+@app.route('/schools-grades-sections/add', methods=['GET', 'POST'])
+def add_schools_grades_sections():
+    """Add a new record to schools_grades_sections."""
+    if request.method == 'POST':
+        new_section = SchoolsGradesSections(
+            school_id=session.get('school_id'),
+            grade_id=request.form['grade_id'],
+            section_id=request.form['section_id'],
+            academic_year_id=request.form['academic_year_id']
+        )
+        db.session.add(new_section)
+        db.session.commit()
+        return redirect('/schools-grades-sections/list')
+
+    schools = School.query.all()
+    grades = Grade.query.all()
+    sections = Section.query.all()
+    academic_years = AcademicYear.query.all()
+
+    return render_template(
+        'schools_grades_sections_form.html',
+        schools=schools,
+        grades=grades,
+        sections=sections,
+        academic_years=academic_years,
+        section=None
+    )
+
+
+@app.route('/schools-grades-sections/edit/<int:id>', methods=['GET', 'POST'])
+def edit_schools_grades_sections(id):
+    """Edit an existing record in schools_grades_sections."""
+    section = SchoolsGradesSections.query.get_or_404(id)
+
+    if request.method == 'POST':
+        
+        section.grade_id = request.form['grade_id']
+        section.section_id = request.form['section_id']
+        section.academic_year_id = request.form['academic_year_id']
+        db.session.commit()
+        return redirect('/schools-grades-sections/list')
+
+    schools = School.query.all()
+    grades = Grade.query.all()
+    sections = Section.query.all()
+    academic_years = AcademicYear.query.all()
+
+    return render_template(
+        'schools_grades_sections_form.html',
+        schools=schools,
+        grades=grades,
+        sections=sections,
+        academic_years=academic_years,
+        section=section
+    )
+
+
+@app.route('/schools-grades-sections/delete/<int:id>', methods=['POST'])
+def delete_schools_grades_sections(id):
+    """Delete a record from schools_grades_sections."""
+    section = SchoolsGradesSections.query.get_or_404(id)
+    db.session.delete(section)
+    db.session.commit()
+    return jsonify({"message": "Record deleted successfully"})
+
+
+@app.route('/houses/list', methods=['GET'])
+def houses_list():
+    """Render the houses list page."""
+    return render_template('houses_list.html')
+
+
+@app.route('/api/houses', methods=['GET'])
+def houses_data():
+    """Fetch and return data for the houses table."""
+    school_id = session.get('school_id')
+    if not school_id:
+        return jsonify({"error": "School ID not found in session"}), 400
+
+    houses = House.query.filter_by(school_id=school_id).all()
+    data = [
+        {
+            "id": house.id,
+            "title": house.title,
+            "description": house.description,
+            "color": house.color,
+            "status": "Active" if house.status else "Inactive",
+        }
+        for house in houses
+    ]
+    return jsonify({"data": data})
+
+
+@app.route('/houses/add', methods=['GET', 'POST'])
+def add_house():
+    """Add a new house."""
+    if request.method == 'POST':
+        school_id = session.get('school_id')
+        if not school_id:
+            return jsonify({"error": "School ID not found in session"}), 400
+
+        new_house = House(
+            school_id=school_id,
+            title=request.form['title'],
+            description=request.form['description'],
+            color=request.form['color'],
+            status=request.form.get('status') == 'on',  # Convert checkbox value to boolean
+        )
+        db.session.add(new_house)
+        db.session.commit()
+        return redirect('/houses/list')
+
+    return render_template('houses_form.html', house=None)
+
+
+@app.route('/houses/edit/<int:id>', methods=['GET', 'POST'])
+def edit_house(id):
+    """Edit an existing house."""
+    house = House.query.get_or_404(id)
+
+    if request.method == 'POST':
+        house.title = request.form['title']
+        house.description = request.form['description']
+        house.color = request.form['color']
+        house.status = request.form.get('status') == 'on'
+        db.session.commit()
+        return redirect('/houses/list')
+
+    return render_template('houses_form.html', house=house)
+
+
+@app.route('/houses/delete/<int:id>', methods=['POST'])
+def delete_house(id):
+    """Delete a house."""
+    house = House.query.get_or_404(id)
+    db.session.delete(house)
+    db.session.commit()
+    return jsonify({"message": "House deleted successfully"})
+
+@app.route('/transports/list', methods=['GET'])
+def transports_list():
+    """Render the transports list page."""
+    return render_template('transports_list.html')
+
+
+@app.route('/api/transports', methods=['GET'])
+def transports_data():
+    """Fetch and return data for the transports table."""
+    school_id = session.get('school_id')
+    if not school_id:
+        return jsonify({"error": "School ID not found in session"}), 400
+
+    transports = Transport.query.filter_by(school_id=school_id).all()
+    data = [
+        {
+            "id": transport.id,
+            "driver": f"{transport.driver.first_name} {transport.driver.last_name}" if transport.driver else "N/A",
+            "driver_code": transport.driver_code,
+            "vehicle_number": transport.vehicle_number,
+            "route_number": transport.route_number,
+            "route_name": transport.route_name,
+            "vehicle_gps_device_id": transport.vehicle_gps_device_id,
+            "vehicle_tracking_url": transport.vehicle_tracking_url,
+            "in_charge": f"{transport.in_charge.first_name} {transport.in_charge.last_name}" if transport.in_charge else "N/A",
+        }
+        for transport in transports
+    ]
+    return jsonify({"data": data})
+
+
+@app.route('/transports/add', methods=['GET', 'POST'])
+def add_transport():
+    """Add a new transport."""
+    if request.method == 'POST':
+        school_id = session.get('school_id')
+        if not school_id:
+            return jsonify({"error": "School ID not found in session"}), 400
+
+        new_transport = Transport(
+            school_id=school_id,
+            driver_id=request.form['driver_id'],
+            driver_code=request.form['driver_code'],
+            vehicle_number=request.form['vehicle_number'],
+            route_number=request.form['route_number'],
+            route_name=request.form['route_name'],
+            vehicle_gps_device_id=request.form['vehicle_gps_device_id'],
+            vehicle_tracking_url=request.form['vehicle_tracking_url'],
+            in_charge_id=request.form['in_charge_id'],
+        )
+        db.session.add(new_transport)
+        db.session.commit()
+        return redirect('/transports/list')
+
+    staffs = Staff.query.filter_by(school_id=session.get('school_id')).all()
+    return render_template('transports_form.html', transport=None, staffs=staffs)
+
+
+@app.route('/transports/edit/<int:id>', methods=['GET', 'POST'])
+def edit_transport(id):
+    """Edit an existing transport."""
+    transport = Transport.query.get_or_404(id)
+
+    if request.method == 'POST':
+        transport.driver_id = request.form['driver_id']
+        transport.driver_code = request.form['driver_code']
+        transport.vehicle_number = request.form['vehicle_number']
+        transport.route_number = request.form['route_number']
+        transport.route_name = request.form['route_name']
+        transport.vehicle_gps_device_id = request.form['vehicle_gps_device_id']
+        transport.vehicle_tracking_url = request.form['vehicle_tracking_url']
+        transport.in_charge_id = request.form['in_charge_id']
+        db.session.commit()
+        return redirect('/transports/list')
+
+    staffs = Staff.query.filter_by(school_id=session.get('school_id')).all()
+    return render_template('transports_form.html', transport=transport, staffs=staffs)
+
+
+@app.route('/transports/delete/<int:id>', methods=['POST'])
+def delete_transport(id):
+    """Delete a transport."""
+    transport = Transport.query.get_or_404(id)
+    db.session.delete(transport)
+    db.session.commit()
+    return jsonify({"message": "Transport deleted successfully"})
+
 
 if __name__ == '__main__':
     app.run(debug=True)

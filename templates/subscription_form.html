@@ -1,12 +1,12 @@
 {% extends 'baseform.html' %}
 
-{% block title %}Add Staffs{% endblock %}
+{% block title %}Subscriptions{% endblock %}
 
 {% block content %}
 
 <div class="container mt-5 form-field-container">
     <div class="form-page-header">
-        <h4>{{ 'Edit' if club else 'Add' }} Subscriptions</h4>
+        <h4>{{ 'Edit' if subscription else 'Add' }} Subscriptions</h4>
     </div>
 
     <form method="post">
@@ -14,44 +14,43 @@
         <div class="mb-3 form-el-div-wraper">
             <label for="title" class="form-label">Title</label>
             <input type="text" class="form-control" id="title" name="title"
-                value="{{subscription.title if subscription else '' }}" required>
+                value="{{subscription.title if subscription else ''}}" required>
         </div>
 
         <div class="mb-3 form-el-div-wraper">
             <label for="transport_details" class="form-label">Description</label>
-            <textarea class="form-control" id="description" name="description">
-        {{ subscription.description if subscription else ''  }} </textarea>
+            <textarea class="form-control" id="description" name="description">{{subscription.description if subscription else ''}}</textarea>
         </div>
 
         <div class="mb-3 form-el-div-wraper">
             <label for="amount_per_student" class="form-label">Amount per student</label>
             <input type="text" class="form-control" id="amount_per_student" name="amount_per_student"
-                value="{{  subscription.amount_per_student if subscription else '' }}" required>
+                value="{{subscription.amount_per_student if subscription else '' }}" required>
         </div>
 
         <div class="mb-3 form-el-div-wraper">
             <label for="min_student_count" class="form-label">Minimum student count</label>
             <input type="text" class="form-control" id="min_student_count" name="min_student_count"
-                value="{{  subscription.min_student_count if subscription else '' }}" required>
+                value="{{subscription.min_student_count if subscription else ''}}" required>
         </div>
 
         <div class="mb-3 form-el-div-wraper">
             <label for="launch" class="form-label">Launch Date</label>
             <input type="date" class="form-control" id="launch" name="launch"
-                value="{{ subscription.launch if subscription else '' }}">
+                value="{{subscription.launch if subscription else ''}}">
         </div>
 
 
         <div class="mb-3 form-el-div-wraper">
             <label for="expiry" class="form-label">Expiry Date</label>
             <input type="date" class="form-control" id="expiry" name="expiry"
-                value="{{ subscription.expiry if subscription else '' }}">
+                value="{{subscription.expiry if subscription else ''}}">
         </div>
 
         <div class="mb-3 form-el-div-wraper">
             <label for="type" class="form-label">Type</label>
             <input type="text" class="form-control" id="type" name="type"
-                value="{{  subscription.type if subscription else '' }}" required>
+                value="{{subscription.type if subscription else ''}}" required>
         </div>
 
         <div class="mb-3 form-el-div-wraper">

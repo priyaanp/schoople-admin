@@ -1,0 +1,23 @@
+{% extends 'baseform.html' %}
+
+{% block title %}{{ 'Edit' if section else 'Add' }} Section{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ 'Edit' if section else 'Add' }} Section</h2>
+    <form method="POST">
+        <div class="form-group">
+            <label for="title">Section Title</label>
+            <input
+                type="text"
+                id="title"
+                name="title"
+                class="form-control"
+                value="{{ section.title if section else '' }}"
+                required
+            />
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Save</button>
+    </form>
+</div>
+{% endblock %}

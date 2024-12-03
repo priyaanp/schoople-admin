@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Transports List{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Transports List</h2>
+    <a href="/transports/add" class="btn btn-primary mb-3">Add Transport</a>
+    <table id="transportsTable" class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Driver</th>
+                <th>Driver Code</th>
+                <th>Vehicle Number</th>
+                <th>Route Number</th>
+                <th>Route Name</th>
+                <th>GPS Device ID</th>
+                <th>Tracking URL</th>
+                <th>In-Charge</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows populated dynamically by DataTables -->
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        $('#transportsTable').DataTable({
+            ajax: '/api/transports',
+            columns: [
+                {
+                    data: 'id',
+                    render: (data, type, row, meta) => meta.row + 1 // Serial number column
+                },
+                { data: 'driver' },
+                { data: 'driver_code' },
+                { data: 'vehicle_number' },
+                { data: 'route_number' },
+                { data: 'route_name' },
+                { data: 'vehicle_gps_device_id' },
+                { data: 'vehicle_tracking_url' },
+                { data: 'in_charge' },
+                {
+                        data: 'id',
+                        render: (data) => `
+                            <a href="/transports/edit/${data}" class="btn btn-edit">Edit</a>
+                            <button class="btn btn-delete" onclick="deleteRole(${data})">Delete</button>
+                        `
+                }
+            ]
+        });
+        window.deleteModule = function (id) {
+                if (confirm('Are you sure you want to delete this section?')) {
+                    $.ajax({
+                        url: `/transports/delete/${id}`,
+                        type: 'POST',
+                        success: function (response) {
+                            alert(response.message);
+                            table.ajax.reload(); // Reload the DataTable
+                        },
+                        error: function () {
+                            alert('Failed to delete the section.');
+                        }
+                    });
+                }
+            };
+    });
+</script>
+{% endblock %}

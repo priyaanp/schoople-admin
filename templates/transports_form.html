@@ -1,0 +1,104 @@
+{% extends 'baseform.html' %}
+
+{% block title %}{{ 'Edit' if transport else 'Add' }} Transport{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ 'Edit' if transport else 'Add' }} Transport</h2>
+    <form method="POST">
+        <div class="form-group">
+            <label for="driver_id">Driver:</label>
+            <select id="driver_id" name="driver_id" class="form-control" required>
+                {% for staff in staffs %}
+                <option value="{{ staff.id }}" {% if transport and staff.id == transport.driver_id %}selected{% endif %}>
+                    {{ staff.first_name }} {{ staff.last_name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="driver_code">Driver Code:</label>
+            <input
+                type="text"
+                id="driver_code"
+                name="driver_code"
+                class="form-control"
+                value="{{ transport.driver_code if transport else '' }}"
+                required
+            />
+        </div>
+
+        <div class="form-group">
+            <label for="vehicle_number">Vehicle Number:</label>
+            <input
+                type="text"
+                id="vehicle_number"
+                name="vehicle_number"
+                class="form-control"
+                value="{{ transport.vehicle_number if transport else '' }}"
+                required
+            />
+        </div>
+
+        <div class="form-group">
+            <label for="route_number">Route Number:</label>
+            <input
+                type="text"
+                id="route_number"
+                name="route_number"
+                class="form-control"
+                value="{{ transport.route_number if transport else '' }}"
+                required
+            />
+        </div>
+
+        <div class="form-group">
+            <label for="route_name">Route Name:</label>
+            <input
+                type="text"
+                id="route_name"
+                name="route_name"
+                class="form-control"
+                value="{{ transport.route_name if transport else '' }}"
+                required
+            />
+        </div>
+
+        <div class="form-group">
+            <label for="vehicle_gps_device_id">GPS Device ID:</label>
+            <input
+                type="text"
+                id="vehicle_gps_device_id"
+                name="vehicle_gps_device_id"
+                class="form-control"
+                value="{{ transport.vehicle_gps_device_id if transport else '' }}"
+            />
+        </div>
+
+        <div class="form-group">
+            <label for="vehicle_tracking_url">Tracking URL:</label>
+            <input
+                type="text"
+                id="vehicle_tracking_url"
+                name="vehicle_tracking_url"
+                class="form-control"
+                value="{{ transport.vehicle_tracking_url if transport else '' }}"
+            />
+        </div>
+
+        <div class="form-group">
+            <label for="in_charge_id">In-Charge:</label>
+            <select id="in_charge_id" name="in_charge_id" class="form-control" required>
+                {% for staff in staffs %}
+                <option value="{{ staff.id }}" {% if transport and staff.id == transport.in_charge_id %}selected{% endif %}>
+                    {{ staff.first_name }} {{ staff.last_name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Save</button>
+    </form>
+</div>
+{% endblock %}

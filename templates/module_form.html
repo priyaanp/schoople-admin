@@ -1,41 +1,79 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ module and 'Edit Module' or 'Add Module' }}</title>
-</head>
-<body>
-    <h1>{{ module and 'Edit Module' or 'Add Module' }}</h1>
+{% extends 'baseform.html' %}
+
+{% block title %}Modules {% endblock %}
+
+{% block content %}
+
+<div class="container mt-5 form-field-container">
+    <div class="form-page-header">
+        <h4>{{ 'Edit' if module else 'Add' }} Module</h4>
+    </div>
+    
+
     <form method="post">
-        <label>Module Name:
-            <input type="text" name="module_name" value="{{ module and module.module_name }}" required>
-        </label><br>
-        <label>Module Link:
-            <input type="text" name="module_link" value="{{ module and module.module_link }}" required>
-        </label><br>        
-        <label>Menu Name:
-            <input type="text" name="menu_name" value="{{ module and module.menu_name }}" required>
-        </label><br>
-        <label>Parent Module:
-            <select name="parent_id">
-                <option value="">None</option>
-                {% for m in modules %}
-                    <option value="{{ m.id }}" {% if module and module.parent_id == m.id %}selected{% endif %}>
-                        {{ m.module_name }}
-                    </option>
-                {% endfor %}
-            </select>
-        </label><br>
-        <label>Status:
-            <input type="checkbox" name="is_active" {% if module and module.is_active %}checked{% endif %}>
-        </label><br>
-        <label>Visible in App:
-            <input type="checkbox" name="is_visible_in_app" {% if module and module.is_visible_in_app %}checked{% endif %}>
-        </label><br>
-        <label>Priority:
-        <input type="text" name="priority" value="{{ module and module.priority }}"></label><br>
-        <button type="submit">Save</button>
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="module_name" class="form-label">Module Name</label>
+            <input type="text" class="form-control" id="module_name" name="module_name"
+                value="{{module.module_name if module  else '' }}" required>
+        </div>
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="module_link" class="form-label">Module Link </label>
+            <input type="text" class="form-control" id="module_link" name="module_link"
+                value="{{module.module_link if module  else '' }}" required>
+        </div>
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="menu_name" class="form-label">Menu name </label>
+            <input type="text" class="form-control" id="menu_name" name="menu_name"
+                value="{{module.menu_name if module  else '' }}" required>
+        </div>
+
+       
+            <div class="mb-3 form-el-div-wraper">
+                <label for="parent_id" class="form-label">Parrent Module</label>
+     
+                <select class="form-control" id="parent_id" name="parent_id" >
+                    <option value="">None</option>
+                    {% for m in modules %}
+                        <option value="{{ m.id }}" {% if module and module.parent_id == m.id %}selected{% endif %}>
+                            {{ m.module_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3 form-el-div-wraper">
+                <label for="priority" class="form-label">Priority</label>
+                <input type="text" class="form-control" id="priority" name="priority"
+                    value="{{module.priority if module  else '' }} " required>
+            </div>    
+            <div class="mb-3 form-el-div-wraper">
+                
+                <label>Status:
+                    <input type="checkbox" name="is_active" {% if module and module.is_active %}checked{% endif %}>
+                </label>
+            </div>
+
+            <div class="mb-3 form-el-div-wraper">
+                
+                <label>Visible in App:
+                    <input type="checkbox" name="is_visible_in_app" {% if module and module.is_visible_in_app %}checked{% endif %}>
+                </label>
+            </div>
+
+            <div class="button-container">
+                <button type="submit" class="btn btn-primary">{{ 'Save' if module else 'Add' }}</button>
+            <a href="/modules/list" class="btn btn-secondary">Cancel</a>
+             </div>
+
+
+            
+        
+        
+        
     </form>
-</body>
-</html>
+
+</div>
+{% endblock %}
+

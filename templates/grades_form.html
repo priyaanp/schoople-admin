@@ -1,0 +1,23 @@
+{% extends 'baseform.html' %}
+
+{% block title %}{{ 'Edit' if grade else 'Add' }} Grade{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ 'Edit' if grade else 'Add' }} Grade</h2>
+    <form method="POST">
+        <div class="form-group">
+            <label for="title">Grade Title</label>
+            <input
+                type="text"
+                id="title"
+                name="title"
+                class="form-control"
+                value="{{ grade.title if grade else '' }}"
+                required
+            />
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Save</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,17 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ role and 'Edit Role' or 'Add Role' }}</title>
-</head>
-<body>
-    <h1>{{ role and 'Edit Role' or 'Add Role' }}</h1>
+{% extends 'baseform.html' %}
+
+{% block title %}Roles{% endblock %}
+
+{% block content %}
+
+
+<div class="container mt-5 form-field-container">
+    <div class="form-page-header">
+        <h4>{{ 'Edit' if  role else 'Add' }} Role</h4>
+    </div>
+  
     <form method="post">
-        <label>Role Name:
-            <input type="text" name="role_name" value="{{ role and role.role_name }}" required>
-        </label><br>
-        <label>Role Type:
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="role_name" class="form-label">Role Name</label>
+            <input type="text" class="form-control" id="role" name="role_name"
+             value="{{role.role_name if role else ''}}" required>
+        </div>
+        
+        <div class="mb-3 form-el-div-wraper">
+            <label for="role_type" class="form-label">Role Type</label>
             <select name="role_type">
                 {% for role_type in role_types %}
                     <option value="{{ role_type }}" {% if role and role.role_type == role_type %}selected{% endif %}>
@@ -19,11 +27,17 @@
                     </option>
                 {% endfor %}
             </select>
-        </label><br>
-        <label>Status:
+        </div>
+        <div class="mb-3 form-el-div-wraper">
+            <label for="status" class="form-label">Status</label>
             <input type="checkbox" name="is_active" {% if role and role.is_active %}checked{% endif %}>
-        </label><br>
-        <button type="submit">Save</button>
+        </div>
+
+        <div class="button-container">
+            <button type="submit" class="btn btn-primary">{{ 'Save' if role else 'Add' }}</button>
+        <a href="/roles/list" class="btn btn-secondary">Cancel</a>
+         </div>
+        
     </form>
-</body>
-</html>
+</div>
+    {% endblock %}

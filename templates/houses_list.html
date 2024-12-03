@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Houses List{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Houses List</h2>
+    <a href="/houses/add" class="btn btn-primary mb-3">Add House</a>
+    <table id="housesTable" class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Color</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows populated dynamically by DataTables -->
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        $('#housesTable').DataTable({
+            ajax: '/api/houses',
+            columns: [
+                {
+                    data: 'id',
+                    render: (data, type, row, meta) => meta.row + 1 // Serial number column
+                },
+                { data: 'title' },
+                { data: 'description' },
+                { data: 'color' },
+                { data: 'status' },
+                {
+                    data: 'id',
+                    render: (data) => `
+                            <a href="/houses/edit/${data}" class="btn btn-edit">Edit</a>
+                            <button class="btn btn-delete" onclick="deleteRole(${data})">Delete</button>
+                        `
+                }
+            ]
+        });
+        window.deleteModule = function (id) {
+            if (confirm('Are you sure you want to delete this house?')) {
+                $.ajax({
+                    url: `/houses/delete/${id}`,
+                    type: 'POST',
+                    success: function (response) {
+                        alert(response.message);
+                        table.ajax.reload(); // Reload the DataTable
+                    },
+                    error: function () {
+                        alert('Failed to delete the house.');
+                    }
+                });
+            }
+        };
+    });
+</script>
+{% endblock %}
