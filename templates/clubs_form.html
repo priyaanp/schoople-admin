@@ -1,24 +1,46 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ 'Edit Club' if club else 'Add Club' }}</title>
-</head>
-<body>
-    <h1>{{ 'Edit Club' if club else 'Add Club' }}</h1>
+{% extends 'baseform.html' %}
+
+{% block title %}Add Staffs{% endblock %}
+
+{% block content %}
+        
+    <div class="container mt-5 form-field-container">
+        <div class="form-page-header">
+            <h4>{{ 'Edit' if club else 'Add' }} Club</h4>
+        </div>
     <form action="{{ url_for('edit_club', id=club.id) if club else url_for('add_club') }}" method="POST">
-        <label for="title">Title:</label>
-        <input type="text" id="title" name="title" value="{{ club.title if club else '' }}" required><br><br>
 
-        <label for="description">Description:</label>
-        <textarea id="description" name="description">{{ club.description if club else '' }}</textarea><br><br>
 
-        <label for="status">Status:</label>
-        <input type="checkbox" id="status" name="status" {% if club and club.status %}checked{% endif %}><br><br>
+        <div class="mb-3 form-el-div-wraper">
+            <label for="title" class="form-label">Title</label>
+            <input type="text" class="form-control" id="title" name="title"
+            value="{{club.title if club else '' }}" required>
+        </div>
 
-        <button type="submit">{{ 'Save' if club else 'Add' }}</button>
-        <a href="{{ url_for('list_clubs') }}">Cancel</a>
+        <div class="mb-3 form-el-div-wraper">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description"
+            name="description">
+            {{ club.description if club else ''  }} </textarea>
+        </div>
+
+
+        <div class="mb-3 form-el-div-wraper">
+        
+            <label>Status:
+                <input type="checkbox" name="status" {% if club and club.status %}checked{% endif %}>
+            </label><br>
+    
+            </div>
+
+            <div class="button-container">
+                <button type="submit" class="btn btn-primary">{{ 'Save' if club else 'Add' }}</button>
+                <a href="/clubs/list" class="btn btn-secondary">Cancel</a>
+             </div>
+            
+        
+
+                     
     </form>
-</body>
-</html>
+</div>
+    {% endblock %}

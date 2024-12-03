@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'baseform.html' %}
 {% block content %}
 <h2>Offers</h2>
 <table>
@@ -21,8 +21,8 @@
             <td>{{ offer.offer_percentage }}</td>
             <td>{{ 'Active' if offer.status else 'Inactive' }}</td>
             <td>
-                <a href="/edit/{{ offer.id }}">Edit</a>
-                <form action="/delete/{{ offer.id }}" method="post" style="display:inline;">
+                <a href="/offers/edit/{{ offer.id }}">Edit</a>
+                <form action="/offers/delete/{{ offer.id }}" method="post" style="display:inline;">
                     <button type="submit">Delete</button>
                 </form>
             </td>

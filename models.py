@@ -44,7 +44,7 @@ class User(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     staff_id = db.Column(db.Integer, db.ForeignKey('staffs.id'), nullable=True)
-    '''student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=True)'''
+    student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=True)
     username = db.Column(db.String, nullable=False, unique=True)
     password = db.Column(db.String, nullable=False)
     is_active = db.Column(db.Boolean, default=True)
@@ -178,3 +178,54 @@ class Club(db.Model):
     status = db.Column(db.Boolean, default=True)
 
     school = db.relationship('School', backref='clubs')
+
+
+
+
+class Student(db.Model):
+    __tablename__ = 'students'
+
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
+    student_code = db.Column(db.String, nullable=True)
+    first_name = db.Column(db.String, nullable=False)
+    middle_name = db.Column(db.String, nullable=True)
+    last_name = db.Column(db.String, nullable=False)
+    dob = db.Column(db.Date, nullable=True)
+    aadhar_number = db.Column(db.String, nullable=True)
+    photo = db.Column(db.String, nullable=True)
+    date_of_admission = db.Column(db.Date, nullable=True)
+    admission_number = db.Column(db.String, nullable=True)
+    identification_mark = db.Column(db.String, nullable=True)
+    interests = db.Column(db.String, nullable=True)
+    hobbies = db.Column(db.String, nullable=True)
+    student_email = db.Column(db.String, nullable=True)
+    religion = db.Column(db.String, nullable=True)
+    caste = db.Column(db.String, nullable=True)
+    permanent_address = db.Column(db.String, nullable=True)
+    communication_address = db.Column(db.String, nullable=True)
+    mother_name = db.Column(db.String, nullable=True)
+    father_name = db.Column(db.String, nullable=True)
+    father_qualification = db.Column(db.String, nullable=True)
+    mother_qualification = db.Column(db.String, nullable=True)
+    father_occupation = db.Column(db.String, nullable=True)
+    mother_occupation = db.Column(db.String, nullable=True)
+    father_mobile = db.Column(db.String, nullable=True)
+    mother_mobile = db.Column(db.String, nullable=True)
+    father_email = db.Column(db.String, nullable=True)
+    mother_email = db.Column(db.String, nullable=True)
+    annual_income = db.Column(db.String, nullable=True)
+    blood_group = db.Column(db.String, nullable=True)
+    mother_tongue = db.Column(db.String, nullable=True)
+    is_single_girl = db.Column(db.Boolean, default=False)
+    is_minority = db.Column(db.Boolean, default=False)
+    sibling_status = db.Column(db.Boolean, default=False)
+    relieving_date = db.Column(db.Date, nullable=True)
+    relieving_comment = db.Column(db.String, nullable=True)
+    status = db.Column(db.Integer, nullable=True)
+
+    # Relationships
+    school = db.relationship('School', backref='students')  # Relates to the `schools` table
+
+    def __repr__(self):
+        return f"<Student(id={self.id}, name={self.first_name} {self.last_name}, school_id={self.school_id})>"

@@ -3,7 +3,7 @@ from flask import session as flask_session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text 
-from models import Club, db, Offer,Subscription,Role,User,UserRole,Permission,School,AcademicYear,SchoolSubscription,Module,SchoolSubscriptionModuleRolePermission,StaffType,Staff
+from models import Club, Student, db, Offer,Subscription,Role,User,UserRole,Permission,School,AcademicYear,SchoolSubscription,Module,SchoolSubscriptionModuleRolePermission,StaffType,Staff
 
 from config import DevelopmentConfig, TestingConfig, ProductionConfig
 
@@ -34,7 +34,7 @@ def list_subscriptions():
     subscriptions = Subscription.query.all()  # Fetch all subscriptions
     return render_template('subscriptions.html', subscriptions=subscriptions)
     '''
-@app.route('/subscription/list')
+@app.route('/subscriptions/list')
 def subscriptions():
     return render_template('subscriptions_datatable.html')
     
@@ -113,7 +113,7 @@ def list_subscriptions():
 
     return render_template('subscriptions.html', subscriptions=pagination.items, pagination=pagination)
     
-@app.route('/subscription/add', methods=['GET', 'POST'])
+@app.route('/subscriptions/add', methods=['GET', 'POST'])
 def add_subscription():
     if request.method == 'POST':
         # Retrieve form data
@@ -143,7 +143,7 @@ def add_subscription():
 
     return render_template('subscription_form.html', subscription=None)
 
-@app.route('/subscription/edit/<int:id>', methods=['GET', 'POST'])
+@app.route('/subscriptions/edit/<int:id>', methods=['GET', 'POST'])
 def edit_subscription(id):
     subscription = Subscription.query.get_or_404(id)
 
@@ -162,14 +162,14 @@ def edit_subscription(id):
 
     return render_template('subscription_form.html', subscription=subscription)
 
-@app.route('/subscription/delete/<int:id>', methods=['POST'])
+@app.route('/subscriptions/delete/<int:id>', methods=['POST'])
 def delete_subscription(id):
     subscription = Subscription.query.get_or_404(id)
     db.session.delete(subscription)
     db.session.commit()
     return redirect(url_for('list_subscriptions'))
 
-@app.route('/offerlist')
+@app.route('/offers/list')
 def offers():
     return render_template('offers_datatable.html')
 
@@ -233,7 +233,7 @@ def api_offers():
 
 
 # Route: Add New Offer
-@app.route('/add', methods=['GET', 'POST'])
+@app.route('/offers/add', methods=['GET', 'POST'])
 def add_offer():
     if request.method == 'POST':
         # Fetch form data
@@ -267,7 +267,7 @@ def add_offer():
     return render_template('offer_form.html', offer=None, subscriptions=subscriptions)
 
 # Route: Edit Offer
-@app.route('/edit/<int:id>', methods=['GET', 'POST'])
+@app.route('/offers/edit/<int:id>', methods=['GET', 'POST'])
 def edit_offer(id):
     offer = Offer.query.get_or_404(id)
 
@@ -290,7 +290,7 @@ def edit_offer(id):
     return render_template('offer_form.html', offer=offer, subscriptions=subscriptions)
 
 # Route: Delete Offer
-@app.route('/delete/<int:id>', methods=['POST'])
+@app.route('/offers/delete/<int:id>', methods=['POST'])
 def delete_offer(id):
     offer = Offer.query.get_or_404(id)
     db.session.delete(offer)
@@ -1648,9 +1648,163 @@ def delete_club(id):
     db.session.commit()
     return redirect(url_for('list_clubs'))
 
+@app.route('/api/students', methods=['GET'])
+def get_students():
+    """API to fetch staff data for DataTable."""
+    students = Student.query.filter_by(school_id=session.get('school_id')).all()
+
+    data = [
+        {
+            "id": student.id,
+            "student_code": student.student_code,            
+            "first_name": student.first_name,
+            "last_name": student.last_name,
+            "dob":student.dob,
+            "status": student.status,
+        }
+        for student in students
+    ]
+    return jsonify({"data": data})
+
+@app.route('/students/add', methods=['GET', 'POST'])
+def add_student():
+    if request.method == 'POST':
+        school_id = session.get('school_id')  # Get school_id from session
+        if not school_id:
+            return jsonify({'error': 'School ID is not set in the session'}), 400
+
+        # Retrieve student details from form
+        student_data = {
+            'school_id': school_id,
+            'student_code': request.form.get('student_code'),
+            'first_name': request.form.get('first_name'),
+            'middle_name': request.form.get('middle_name'),
+            'last_name': request.form.get('last_name'),
+            'dob': request.form.get('dob'),
+            'aadhar_number': request.form.get('aadhar_number'),
+            'date_of_admission': request.form.get('date_of_admission'),
+            'admission_number': request.form.get('admission_number'),
+            'identification_mark': request.form.get('identification_mark'),
+            'interests': request.form.get('interests'),
+            'hobbies': request.form.get('hobbies'),
+            'student_email': request.form.get('student_email'),
+            'religion': request.form.get('religion'),
+            'caste': request.form.get('caste'),
+            'permanent_address': request.form.get('permanent_address'),
+            'communication_address': request.form.get('communication_address'),
+            'mother_name': request.form.get('mother_name'),
+            'father_name': request.form.get('father_name'),
+            'father_qualification': request.form.get('father_qualification'),
+            'mother_qualification': request.form.get('mother_qualification'),
+            'father_occupation': request.form.get('father_occupation'),
+            'mother_occupation': request.form.get('mother_occupation'),
+            'father_mobile': request.form.get('father_mobile'),
+            'mother_mobile': request.form.get('mother_mobile'),
+            'father_email': request.form.get('father_email'),
+            'mother_email': request.form.get('mother_email'),
+            'annual_income': request.form.get('annual_income'),
+            'blood_group': request.form.get('blood_group'),
+            'mother_tongue': request.form.get('mother_tongue'),
+            'is_single_girl': request.form.get('is_single_girl') == 'on',
+            'is_minority': request.form.get('is_minority') == 'on',
+            'sibling_status': request.form.get('sibling_status') == 'on',
+            'status': request.form.get('status')
+        }
+
+        # Insert into `students` table
+        new_student = Student(**student_data)
+        db.session.add(new_student)
+        db.session.commit()
+
+        # Create a corresponding user entry in the `users` table
+        user_data = {
+            'student_id': new_student.id,
+            'username': request.form.get('username'),
+            'password': request.form.get('password'),  # Hash the password
+            'is_active': request.form.get('is_active') == 'on',
+        }
+        new_user = User(**user_data)
+        db.session.add(new_user)
+        db.session.commit()
+
+        return redirect('/students/list')
+
+    return render_template('student_form.html', student=None, user=None)
+
+@app.route('/students/edit/<int:id>', methods=['GET', 'POST'])
+def edit_student(id):
+    student = Student.query.get_or_404(id)
+    user = User.query.filter_by(student_id=id).first()
+
+    if request.method == 'POST':
+        # Update student details
+        student.student_code = request.form.get('student_code')
+        student.first_name = request.form.get('first_name')
+        student.middle_name = request.form.get('middle_name')
+        student.last_name = request.form.get('last_name')
+        student.dob = request.form.get('dob')
+        student.aadhar_number = request.form.get('aadhar_number')
+        student.date_of_admission = request.form.get('date_of_admission')
+        student.admission_number = request.form.get('admission_number')
+        student.identification_mark = request.form.get('identification_mark')
+        student.interests = request.form.get('interests')
+        student.hobbies = request.form.get('hobbies')
+        student.student_email = request.form.get('student_email')
+        student.religion = request.form.get('religion')
+        student.caste = request.form.get('caste')
+        student.permanent_address = request.form.get('permanent_address')
+        student.communication_address = request.form.get('communication_address')
+        student.mother_name = request.form.get('mother_name')
+        student.father_name = request.form.get('father_name')
+        student.father_qualification = request.form.get('father_qualification')
+        student.mother_qualification = request.form.get('mother_qualification')
+        student.father_occupation = request.form.get('father_occupation')
+        student.mother_occupation = request.form.get('mother_occupation')
+        student.father_mobile = request.form.get('father_mobile')
+        student.mother_mobile = request.form.get('mother_mobile')
+        student.father_email = request.form.get('father_email')
+        student.mother_email = request.form.get('mother_email')
+        student.annual_income = request.form.get('annual_income')
+        student.blood_group = request.form.get('blood_group')
+        student.mother_tongue = request.form.get('mother_tongue')
+        student.is_single_girl = request.form.get('is_single_girl') == 'on'
+        student.is_minority = request.form.get('is_minority') == 'on'
+        student.sibling_status = request.form.get('sibling_status') == 'on'
+        student.status = request.form.get('status')
+
+        # Update the corresponding user entry
+        if user:
+            user.username = request.form.get('username')
+            user.password = request.form.get('password')
+            user.is_active = request.form.get('is_active') == 'on'
+
+        db.session.commit()
+        return redirect('/students/list')
+
+    return render_template('student_form.html', student=student, user=user)
+
+@app.route('/students/list')
+def list_students():    
+    return render_template('students_list.html')
 
 
-
+@app.route('/students/delete/<int:id>', methods=['POST'])
+def delete_student(id):
+    try:
+        # Find the user associated with the student
+        user = User.query.filter_by(student_id=id).first()
+        if user:
+            db.session.delete(user)  # Delete the user record first
+        
+        # Find the student and delete it
+        student = Student.query.get_or_404(id)
+        db.session.delete(student)
+        
+        db.session.commit()
+        return jsonify({'message': 'Student deleted successfully'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 400
 
 if __name__ == '__main__':
     app.run(debug=True)
