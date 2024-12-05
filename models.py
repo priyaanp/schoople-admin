@@ -50,8 +50,9 @@ class User(db.Model):
     is_active = db.Column(db.Boolean, default=True)
     staff = db.relationship('Staff', backref='user', lazy='joined')
     roles = db.relationship('Role', secondary='user_roles', backref='users')
-    def check_password(self, password):
-        return check_password_hash(self.password, password)
+    def set_password(self, raw_password):
+        """Hash and set the user's password."""
+        self.password = generate_password_hash(raw_password)
 
 
 class UserRole(db.Model):
@@ -306,3 +307,25 @@ class Transport(db.Model):
     driver = db.relationship('Staff', foreign_keys=[driver_id])
     in_charge = db.relationship('Staff', foreign_keys=[in_charge_id])
     school = db.relationship('School', backref='transports')
+
+class SchoolStudent(db.Model):
+    __tablename__ = 'school_student'
+
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
+    house_id = db.Column(db.Integer, db.ForeignKey('houses.id'), nullable=True)
+    clubs = db.Column(db.String, nullable=True)  # Assuming it's a comma-separated string
+    school_grade_section_id = db.Column(db.Integer, db.ForeignKey('schools_grades_sections.id'), nullable=True)
+    academic_year_id = db.Column(db.Integer, db.ForeignKey('academic_years.id'), nullable=False)
+    transport_id = db.Column(db.Integer, db.ForeignKey('transports.id'), nullable=True)
+    status = db.Column(db.Boolean, nullable=False, default=True)  # Active/Inactive
+
+    # Relationships
+    student = db.relationship('Student', backref='school_student', lazy=True)
+    house = db.relationship('House', backref='school_students', lazy=True)
+    grade_section = db.relationship('SchoolsGradesSections', backref='school_students', lazy=True)
+    academic_year = db.relationship('AcademicYear', backref='school_students', lazy=True)
+    transport = db.relationship('Transport', backref='school_students', lazy=True)
+
+    def __repr__(self):
+        return f"<SchoolStudent(id={self.id}, student_id={self.student_id}, status={self.status})>"

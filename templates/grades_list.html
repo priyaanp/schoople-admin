@@ -1,11 +1,18 @@
 {% extends 'base.html' %}
 
-{% block title %}Grades List{% endblock %}
+{% block title %}Grades{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>Grades List</h2>
-    <a href="/grades/add" class="btn btn-primary mb-3">Add Grade</a>
+    <div class="data-table-wraper">
+        <div class="data-table-header">
+            <div class="data-table-header-text">
+                <h4>Grades List</h4>
+            </div>
+            <div class="data-table-header-add-new">
+                <button style="font-size:18px"><a href="/grades/add">Add <i class="fa fa-plus-circle"></i></a></button>
+            </div>
+            
+        </div>
     <table id="gradesTable" class="table table-striped">
         <thead>
             <tr>
@@ -25,7 +32,7 @@
 {% block scripts %}
 <script>
     $(document).ready(function () {
-        $('#gradesTable').DataTable({
+        const table = $('#gradesTable').DataTable({
             ajax: '/api/grades', // Fetch data from the API
             columns: [
                 {
@@ -38,7 +45,7 @@
                         data: 'id',
                         render: (data) => `
                             <a href="/grades/edit/${data}" class="btn btn-edit">Edit</a>
-                            <button class="btn btn-delete" onclick="deleteRole(${data})">Delete</button>
+                            <button class="btn btn-delete" onclick="deleteModule(${data})">Delete</button>
                         `
                     }
             ]

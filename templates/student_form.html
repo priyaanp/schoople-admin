@@ -195,17 +195,86 @@
         <h3>User Details</h3>
         <div class="form-group">
             <label>Username:</label>
-            <input type="text" class="form-control" name="username" value="{{ user.username if user else '' }}" required>
+            <input type="text" class="form-control" name="username" value="{{ users.username if users else '' }}" required>
         </div>
 
         <div class="form-group">
             <label>Password:</label>
-            <input type="password" class="form-control" name="password" value="{{ user.password if user else '' }}" required>
+            <input type="password" class="form-control" name="password" {% if not users %}required{% endif %}>
         </div>
 
         <div class="form-group">
             <label>Active:</label>
-            <input type="checkbox" name="is_active" {% if user and user.is_active %}checked{% endif %}>
+            <input type="checkbox" name="is_active" {% if users and users.is_active %}checked{% endif %}>
+        </div>
+
+        <h4 class="mt-4">Additional Information</h4>
+        <div class="form-group">
+            <label for="house_id">House:</label>
+            <select id="house_id" name="house_id" class="form-control">
+                <option value="">Select House</option>
+                {% for house in houses %}
+                <option value="{{ house.id }}" {% if school_student and school_student.house_id == house.id %}selected{% endif %}>
+                    {{ house.title }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="clubs">Clubs:</label>
+            <input
+                type="text"
+                id="clubs"
+                name="clubs"
+                class="form-control"
+                placeholder="Enter comma-separated club IDs"
+                value="{{ school_student.clubs if school_student else '' }}"
+            />
+        </div>
+
+        <div class="form-group">
+            <label for="school_grade_section_id">Grade Section:</label>
+            <select id="school_grade_section_id" name="school_grade_section_id" class="form-control" required>
+                <option value="">Select Grade Section</option>
+                {% for section in grade_sections %}
+                <option value="{{ section.id }}" {% if school_student and school_student.school_grade_section_id == section.id %}selected{% endif %}>
+                    {{ section.grade.title }} - {{ section.section.title }} - ({{ section.academic_year.start_date }} - {{ section.academic_year.end_date }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="academic_year_id">Academic Year:</label>
+            <select id="academic_year_id" name="academic_year_id" class="form-control" required>
+                <option value="">Select Academic Year</option>
+                {% for year in academic_years %}
+                <option value="{{ year.id }}" {% if school_student and school_student.academic_year_id == year.id %}selected{% endif %}>
+                    {{ year.start_date }} - {{ year.end_date }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="transport_id">Transport:</label>
+            <select id="transport_id" name="transport_id" class="form-control">
+                <option value="">Select Transport</option>
+                {% for transport in transports %}
+                <option value="{{ transport.id }}" {% if school_student and school_student.transport_id == transport.id %}selected{% endif %}>
+                    {{ transport.vehicle_number }} (Route: {{ transport.route_name }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="status">Status:</label>
+            <select id="status" name="status" class="form-control">
+                <option value="1" {% if school_student and school_student.status %}selected{% endif %}>Active</option>
+                <option value="0" {% if school_student and not school_student.status %}selected{% endif %}>Inactive</option>
+            </select>
         </div>
 
         <button type="submit" class="btn btn-primary">Save</button>

@@ -1,23 +1,40 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ year and 'Edit Academic Year' or 'Add Academic Year' }}</title>
-</head>
-<body>
-    <h1>{{ year and 'Edit Academic Year' or 'Add Academic Year' }}</h1>
+{% extends 'baseform.html' %}
+
+{% block title %}AcademicYears{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5 form-field-container">
+    <div class="form-page-header">
+        <h4>{{ year and 'Edit' or 'Add ' }} Academic Years Table</h4>
+    </div>
+
     <form method="post">
-        <label>Start Date:
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="start_date" class="form-label">Start Date</label>
             <input type="date" name="start_date" value="{{ year and year.start_date }}" required>
-        </label><br>
-        <label>End Date:
+        </div>
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="end_date" class="form-label">End Date</label>
             <input type="date" name="end_date" value="{{ year and year.end_date }}" required>
-        </label><br>
-        <label>Status:
-            <input type="checkbox" name="active" {% if year and year.active %}checked{% endif %}>
-        </label><br>
-        <button type="submit">Save</button>
+        </div>
+
+        <div class="mb-3 form-el-div-wraper">
+
+            <label>Status:
+                <input type="checkbox" name="active" {% if year and year.active %}checked{% endif %}>
+            </label><br>
+
+        </div>
+        
+        <div class="button-container">
+            <button type="submit" class="btn btn-primary">{{ 'Save' if academicyears else 'Add' }}</button>
+            <a href="/academic_years/list" class="btn btn-secondary">Cancel</a>
+        </div>
+
     </form>
-</body>
-</html>
+        
+</div>
+{% endblock %}

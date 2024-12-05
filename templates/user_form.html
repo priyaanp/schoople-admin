@@ -12,7 +12,7 @@
             <input type="text" name="username" value="{{ user and user.username }}" required>
         </label><br>
         <label>Password:
-            <input type="password" name="password" value="{{ user and user.password }}" required>
+            <input type="password" name="password" {% if not user %}required{% endif %}>
         </label><br>
         <label>Status:
             <input type="checkbox" name="is_active" {% if user and user.is_active %}checked{% endif %}>

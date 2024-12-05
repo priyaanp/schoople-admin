@@ -3,21 +3,30 @@
 {% block title %}{{ 'Edit' if grade else 'Add' }} Grade{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>{{ 'Edit' if grade else 'Add' }} Grade</h2>
-    <form method="POST">
-        <div class="form-group">
-            <label for="title">Grade Title</label>
-            <input
-                type="text"
-                id="title"
-                name="title"
-                class="form-control"
-                value="{{ grade.title if grade else '' }}"
-                required
-            />
+
+
+
+
+<div class="container mt-5 form-field-container">
+    <div class="form-page-header">
+        <h4>{{ 'Edit' if  grade else 'Add' }} Grade</h4>
+    </div>
+  
+    <form method="post">
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="title" class="form-label">Grade Title</label>
+            <input type="text" class="form-control" id="title" name="title"
+             value="{{grade.title if grade else ''}}" required>
         </div>
-        <button type="submit" class="btn btn-primary mt-3">Save</button>
+
+
+        <div class="button-container">
+            <button type="submit" class="btn btn-primary">{{ 'Save' if role else 'Add' }}</button>
+        <a href="/grades/list" class="btn btn-secondary">Cancel</a>
+         </div>
+        
+       
     </form>
 </div>
 {% endblock %}

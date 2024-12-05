@@ -1,24 +1,83 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>{{ offer and "Edit Offer" or "Add Offer" }}</h2>
-<form method="post">
-    <label>Subscription:
-        <select name="subscription_id">
-            {% for subscription in subscriptions %}
+
+<div class="container mt-5 form-field-container">
+    <div class="form-page-header">
+        <h4>{{ 'Edit' if offers else 'Add' }} Offers</h4>
+    </div>
+
+    <form method="post">
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="subscription_id" class="form-label">Subscription</label>
+            <select name="subscription_id">
+                {% for subscription in subscriptions %}
                 <option value="{{ subscription.id }}" {% if offer and offer.subscription_id == subscription.id %}selected{% endif %}>
                     {{ subscription.title }}
                 </option>
             {% endfor %}
-        </select>
-    </label><br>
-    <label>Title: <input type="text" name="title" value="{{ offer and offer.title }}"></label><br>
-    <label>Offer Percentage: <input type="text" name="offer_percentage" value="{{ offer and offer.offer_percentage }}"></label><br>
-    <label>Discount Amount: <input type="text" name="discount_amount" value="{{ offer and offer.discount_amount }}"></label><br>
-    <label>Additional Amount: <input type="text" name="additional_amount" value="{{ offer and offer.additional_amount }}"></label><br>
-    <label>Launch Date: <input type="date" name="launch" value="{{ offer and offer.launch }}"></label><br>
-    <label>Expiry Date: <input type="date" name="expiry" value="{{ offer and offer.expiry }}"></label><br>
-    <label>Is School Specific: <input type="checkbox" name="is_school_specific" {% if offer and offer.is_school_secific %}checked{% endif %}></label><br>
-    <label>Status: <input type="checkbox" name="status" {% if offer and offer.status %}checked{% endif %}></label><br>
-    <button type="submit">Save</button>
+            </select>
+        </div>
+
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="title" class="form-label">Tittle</label>
+            <input type="text" class="form-control" id="offer" name="title"
+             value="{{offer.title if offer else ''}}" required>
+        </div>
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="offer_percentage" class="form-label">Offer Percentage</label>
+            <input type="text" class="form-control" id="offer" name="offer_percentage"
+             value="{{offer.offer_percentage if offer else ''}}" required>
+        </div>
+    
+        <div class="mb-3 form-el-div-wraper">
+            <label for="discount_amount" class="form-label">Discount Amount</label>
+            <input type="text" class="form-control" id="offer" name="Discount Amount"
+             value="{{offer.discount_amount if offer else ''}}" required>
+        </div>
+        
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="additional_amount" class="form-label">Additional Amount</label>
+            <input type="text" class="form-control" id="offer" name="additional_amount"
+             value="{{offer.additional_amount if offer else ''}}" required>
+        </div>
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="launch" class="form-label">Launch Date</label>
+            <input type="date" name="launch" value="{{ offer and offer.launch }}" required>
+        </div>
+    
+    
+        <div class="mb-3 form-el-div-wraper">
+            <label for="expiry" class="form-label">Start Date</label>
+            <input type="date" name="expiry" value="{{offer and offer.expiry}}" required>
+        </div>
+
+
+        <div class="mb-3 form-el-div-wraper">
+        <label for="is_school_specific" class="form-label">Is School Specific</label>
+            <input type="checkbox" name="is_school_specific" {% if offer and offer.is_school_secific %}checked{% endif %}>
+        
+        </div>
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="status" class="form-label">Status</label>
+                <input type="checkbox" name="status" {% if offer and offer.status %}checked{% endif %}>
+            
+            </div>
+        
+
+        
+
+        <div class="button-container">
+            <button type="submit" class="btn btn-primary">{{ 'Save' if staff else 'Add' }}</button>
+        <a href="/permissions/list" class="btn btn-secondary">Cancel</a>
+         </div>
+    
+    
+    
 </form>
 {% endblock %}

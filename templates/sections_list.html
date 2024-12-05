@@ -3,9 +3,20 @@
 {% block title %}Sections List{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>Sections List</h2>
-    <a href="/sections/add" class="btn btn-primary mb-3">Add Section</a>
+
+
+
+    <div class="data-table-wraper">
+        <div class="data-table-header">
+            <div class="data-table-header-text">
+                <h4>Section List</h4>
+            </div>
+            <div class="data-table-header-add-new">
+                <button style="font-size:18px"><a href="/sections/add">Add  <i class="fa fa-plus-circle"></i></a></button>
+            </div>
+            
+        </div>
+
     <table id="sectionsTable" class="table table-striped">
         <thead>
             <tr>
@@ -25,7 +36,7 @@
 {% block scripts %}
 <script>
     $(document).ready(function () {
-        $('#sectionsTable').DataTable({
+        const table =  $('#sectionsTable').DataTable({
             ajax: '/api/sections', // Fetch data from the API
             columns: [
                 {
@@ -38,7 +49,7 @@
                         data: 'id',
                         render: (data) => `
                             <a href="/sections/edit/${data}" class="btn btn-edit">Edit</a>
-                            <button class="btn btn-delete" onclick="deleteRole(${data})">Delete</button>
+                            <button class="btn btn-delete" onclick="deleteModule(${data})">Delete</button>
                         `
                     }
             ]

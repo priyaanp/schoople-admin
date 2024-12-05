@@ -3,8 +3,8 @@ from flask import session as flask_session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text 
-from models import Club, Grade, House, SchoolsGradesSections, Section, Student, Transport, db, Offer,Subscription,Role,User,UserRole,Permission,School,AcademicYear,SchoolSubscription,Module,SchoolSubscriptionModuleRolePermission,StaffType,Staff
-
+from models import Club, Grade, House, SchoolStudent, SchoolsGradesSections, Section, Student, Transport, db, Offer,Subscription,Role,User,UserRole,Permission,School,AcademicYear,SchoolSubscription,Module,SchoolSubscriptionModuleRolePermission,StaffType,Staff
+from werkzeug.security import check_password_hash
 from config import DevelopmentConfig, TestingConfig, ProductionConfig
 
 app = Flask(__name__)
@@ -457,7 +457,8 @@ def add_user():
         role_ids = request.form.getlist('roles')
 
         # Create a new user
-        new_user = User(username=username, password=password, is_active=is_active)
+        new_user = User(username=username, is_active=is_active)
+        new_user.set_password(password)
         db.session.add(new_user)
         db.session.commit()
 
@@ -476,13 +477,14 @@ def edit_user(id):
     user = User.query.get_or_404(id)
 
     if request.method == 'POST':
-        user.username = request.form['username']
-        user.password = request.form['password']
+        user.username = request.form['username'] 
         user.is_active = request.form.get('is_active') == 'on'
         role_ids = request.form.getlist('roles')
-
+        new_password = request.form['password']
+        if new_password:
+            user.set_password(new_password) 
         # Clear existing roles
-        UserRole.query.filter_by(user_id=user.id).delete()
+        
 
         # Assign new roles
         for role_id in role_ids:
@@ -1186,7 +1188,7 @@ def login():
 
         user = User.query.filter_by(username=username).first()
   
-        if user :
+        if user and check_password_hash(user.password, password):
             session['user_id'] = user.id
             session['role'] = user_role(user.id)  # Fetch user's role dynamically
             session['role_id'] = user_role_id(user.id)  # Fetch user's role dynamically
@@ -1480,10 +1482,10 @@ def add_staff():
         # Create the User object
         new_user = User(
             staff_id=new_staff.id,  # Link the new staff record
-            username=username,
-            password=password,
+            username=username,           
             is_active=is_active,
         )
+        new_user.set_password(password)
         db.session.add(new_user)
         db.session.commit()
 
@@ -1540,20 +1542,25 @@ def edit_staff(id):
         # Update User object
         if user:
             user.username = username
-            user.password = password
+            new_password = request.form['password']
             user.is_active = is_active
+            if new_password:
+                user.set_password(new_password)    
+            
         else:  # Create a new user if not already linked
             user = User(
                 staff_id=staff.id,
-                username=username,
-                password=password,
+                username=username,                
                 is_active=is_active,
             )
-            db.session.add(user)
-            db.session.commit()
+            user.set_password(password)
+
+                
+        db.session.add(user)
+        db.session.commit()
 
         # Update user roles
-        UserRole.query.filter_by(user_id=user.id).delete()  # Clear existing roles
+        
         for role_id in roles_selected:
             user_role = UserRole(user_id=user.id, role_id=role_id)
             db.session.add(user_role)
@@ -1648,8 +1655,8 @@ def delete_club(id):
     db.session.commit()
     return redirect(url_for('list_clubs'))
 
-@app.route('/api/students', methods=['GET'])
-def get_students():
+@app.route('/api/students1', methods=['GET'])
+def get_students1():
     """API to fetch staff data for DataTable."""
     students = Student.query.filter_by(school_id=session.get('school_id')).all()
 
@@ -1665,6 +1672,70 @@ def get_students():
         for student in students
     ]
     return jsonify({"data": data})
+@app.route('/api/students', methods=['GET'])
+def get_students():
+    """Fetch students based on grade and section filters."""
+    school_id = session.get('school_id')  # Ensure school_id is fetched from the session
+    grade_id = request.args.get('grade_id')
+    section_id = request.args.get('section_id')
+
+    # Query students based on filters
+    query = db.session.query(
+        Student.id.label("id"),
+        Student.student_code.label("student_code"),     
+        Student.first_name.label("first_name"),
+        Student.last_name.label("last_name"),
+        Student.dob.label("dob"),
+        Grade.title.label("grade"),
+        Section.title.label("section"),
+        School.title.label("school"),
+        db.case(
+        (Student.status == 1, "Passed"),
+        else_="Failed"
+    ).label("status")
+    ).join(
+        SchoolStudent, SchoolStudent.student_id == Student.id
+    ).join(
+        SchoolsGradesSections, SchoolsGradesSections.id == SchoolStudent.school_grade_section_id
+    ).join(
+        Grade, Grade.id == SchoolsGradesSections.grade_id
+    ).join(
+        Section, Section.id == SchoolsGradesSections.section_id
+    ).join(
+        School, School.id == Student.school_id
+    ).filter(
+        Student.school_id == school_id
+    )
+
+    # Apply grade filter
+    if grade_id:
+        query = query.filter(SchoolsGradesSections.grade_id == grade_id)
+
+    # Apply section filter
+    if section_id:
+        query = query.filter(SchoolsGradesSections.section_id == section_id)
+
+    students = query.all()
+
+    # Format data for DataTables
+    data = [
+        {
+           
+            "id": student.id,
+            "student_code":student.student_code,
+            "name": f"{student.first_name} {student.last_name}",
+            "grade": student.grade,
+            "section": student.section,
+            "dob":student.dob,
+            "school": student.school,
+            "status": student.status,
+        }
+        for student in students
+    ]
+
+    return jsonify({"data": data})
+
+
 
 @app.route('/students/add', methods=['GET', 'POST'])
 def add_student():
@@ -1724,18 +1795,45 @@ def add_student():
             'is_active': request.form.get('is_active') == 'on',
         }
         new_user = User(**user_data)
+        new_user.set_password(new_user.password)
         db.session.add(new_user)
         db.session.commit()
 
-        return redirect('/students/list')
+# Insert into school_student table
+        new_school_student = SchoolStudent(
+            student_id=new_student.id,
+            house_id=request.form['house_id'] or None,
+            clubs=request.form['clubs'],
+            school_grade_section_id=request.form['school_grade_section_id'],
+            academic_year_id=request.form['academic_year_id'],
+            transport_id=request.form['transport_id'] or None,
+            status=request.form.get('status') == '1'
+        )
+        db.session.add(new_school_student)
+        db.session.commit()
 
+        return redirect('/students/list')
+    houses = House.query.filter_by(school_id=session['school_id']).all()
+    grade_sections = SchoolsGradesSections.query.filter_by(school_id=session['school_id']).all()
+    academic_years = AcademicYear.query.all()
+    transports = Transport.query.filter_by(school_id=session['school_id']).all()
+
+    return render_template(
+        'student_form.html',
+        student=None,
+        school_student=None,
+        houses=houses,
+        grade_sections=grade_sections,
+        academic_years=academic_years,
+        transports=transports
+    )
     return render_template('student_form.html', student=None, user=None)
 
 @app.route('/students/edit/<int:id>', methods=['GET', 'POST'])
 def edit_student(id):
     student = Student.query.get_or_404(id)
     user = User.query.filter_by(student_id=id).first()
-
+    school_student = SchoolStudent.query.filter_by(student_id=id).first()
     if request.method == 'POST':
         # Update student details
         student.student_code = request.form.get('student_code')
@@ -1773,19 +1871,85 @@ def edit_student(id):
         student.status = request.form.get('status')
 
         # Update the corresponding user entry
-        if user:
-            user.username = request.form.get('username')
-            user.password = request.form.get('password')
-            user.is_active = request.form.get('is_active') == 'on'
 
+        username = request.form.get('username')
+        password = request.form.get('password')  # In real apps, hash the password!
+        is_active = request.form.get('is_active') == 'on'
+        roles_selected = request.form.getlist('roles')
+
+        # Update User object
+        if user:
+            user.username = username
+            new_password = request.form['password']
+            user.is_active = is_active
+            if new_password:
+                user.set_password(new_password)    
+            
+        else:  # Create a new user if not already linked
+            user = User(               
+                username=username,                
+                is_active=is_active,
+            )
+            user.set_password(password)                
+        db.session.add(user)
+        db.session.commit()
+
+        if school_student:
+            school_student.house_id = request.form['house_id'] or None
+            school_student.clubs = request.form['clubs']
+            school_student.school_grade_section_id = request.form['school_grade_section_id']
+            school_student.academic_year_id = request.form['academic_year_id']
+            school_student.transport_id = request.form['transport_id'] or None
+            school_student.status = request.form.get('status') == '1'
+        else:
+            # Create a new SchoolStudent record
+            school_student = SchoolStudent(
+                student_id=id,
+                house_id=request.form['house_id'] or None,
+                clubs=request.form['clubs'],
+                school_grade_section_id=request.form['school_grade_section_id'],
+                academic_year_id=request.form['academic_year_id'],
+                transport_id=request.form['transport_id'] or None,
+                status=request.form.get('status') == '1'
+            )
+            db.session.add(school_student)
         db.session.commit()
         return redirect('/students/list')
-
+    houses = House.query.filter_by(school_id=session['school_id']).all()
+    users = User.query.filter_by(student_id=id).first()
+    grade_sections = SchoolsGradesSections.query.filter_by(school_id=session['school_id']).all()
+    academic_years = AcademicYear.query.all()
+    transports = Transport.query.filter_by(school_id=session['school_id']).all()
+    houses = House.query.filter_by(school_id=session['school_id']).all()
+    print(users)
+    return render_template(
+        'student_form.html',
+        student=student,
+        users=users,
+        school_student=school_student,
+        houses=houses,
+        grade_sections=grade_sections,
+        academic_years=academic_years,
+        transports=transports
+    )
     return render_template('student_form.html', student=student, user=user)
 
 @app.route('/students/list')
-def list_students():    
-    return render_template('students_list.html')
+def list_students(): 
+    school_id = session.get('school_id')   
+    grades = Grade.query.join(
+        SchoolsGradesSections, Grade.id == SchoolsGradesSections.grade_id
+    ).filter(SchoolsGradesSections.school_id == school_id).all()
+
+    sections = Section.query.join(
+        SchoolsGradesSections, Section.id == SchoolsGradesSections.section_id
+    ).filter(SchoolsGradesSections.school_id == school_id).all()
+
+    return render_template(
+        'students_list.html',
+        grades=grades,
+        sections=sections
+    )
 
 
 @app.route('/students/delete/<int:id>', methods=['POST'])
