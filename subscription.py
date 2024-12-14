@@ -1753,6 +1753,7 @@ def add_student():
             'last_name': request.form.get('last_name'),
             'dob': request.form.get('dob'),
             'aadhar_number': request.form.get('aadhar_number'),
+            'photo': request.form.get('photo'),
             'date_of_admission': request.form.get('date_of_admission'),
             'admission_number': request.form.get('admission_number'),
             'identification_mark': request.form.get('identification_mark'),
@@ -1842,6 +1843,7 @@ def edit_student(id):
         student.last_name = request.form.get('last_name')
         student.dob = request.form.get('dob')
         student.aadhar_number = request.form.get('aadhar_number')
+        student.photo = request.form.get('photo')
         student.date_of_admission = request.form.get('date_of_admission')
         student.admission_number = request.form.get('admission_number')
         student.identification_mark = request.form.get('identification_mark')

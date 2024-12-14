@@ -1,12 +1,23 @@
 {% extends 'base.html' %}
 
-{% block title %}Students List{% endblock %}
+{% block title %}Sections List{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>Students List</h2>
+
+
+
+    <div class="data-table-wraper">
+        <div class="data-table-header">
+            <div class="data-table-header-text">
+                <h4>Section List</h4>
+            </div>
+            <div class="data-table-header-add-new">
+                <button style="font-size:18px"><a href="/students/add">Add  <i class="fa fa-plus-circle"></i></a></button>
+            </div>
+            
+        </div>
     <!-- Filters -->
-    <div class="filters mb-3">
+    <div class="filters-container mb-3">
         <label for="grade-filter">Grade:</label>
         <select id="grade-filter" class="form-control">
             <option value="">All Grades</option>

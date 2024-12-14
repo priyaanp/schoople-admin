@@ -1,240 +1,284 @@
 {% extends 'baseform.html' %}
 
-{% block title %}{{ 'Edit' if student else 'Add' }} Student{% endblock %}
+{% block title %}Students{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>{{ 'Edit' if student else 'Add' }} Student</h2>
-    <form method="POST" enctype="multipart/form-data">
-        <!-- Student Details -->
-        <h3>Student Details</h3>
-        <div class="form-group">
-            <label>Student Code:</label>
-            <input type="text" class="form-control" name="student_code" value="{{ student.student_code if student else '' }}">
+
+
+
+<div class="container mt-5 form-field-container">
+    <div class="form-page-header">
+        <h4>{{'Edit' if  student else 'Add'}} Student</h4>
+    </div>
+
+    <form action="{{ url_for('edit_student', id=student.id) if student else url_for('add_student') }}" method="POST">
+    <fieldset>
+        <legend>Student Details</legend>
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="student_code" class="form-label">Student Code</label>
+            <input type="text" name="student_code" value="{{student.student_code if student else ''}}" required>
         </div>
 
-        <div class="form-group">
-            <label>First Name:</label>
-            <input type="text" class="form-control" name="first_name" value="{{ student.first_name if student else '' }}" required>
+
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="first_name" class="form-label">First Name</label>
+            <input type="text" name="first_name" value="{{student.first_name if student else '' ''}}" required>
         </div>
 
-        <div class="form-group">
-            <label>Middle Name:</label>
-            <input type="text" class="form-control" name="middle_name" value="{{ student.middle_name if student else '' }}">
+    
+        <div class="mb-3 form-el-div-wraper">
+            <label for="middle_name" class="form-label">Middle Name</label>
+            <input type="text" name="middle_name" value="{{student.middle_name if student else ''}}" required>
         </div>
 
-        <div class="form-group">
-            <label>Last Name:</label>
-            <input type="text" class="form-control" name="last_name" value="{{ student.last_name if student else '' }}" required>
+        <div class="mb-3 form-el-div-wraper">
+            <label for="last_name" class="form-label">Last Name</label>
+            <input type="text" name="last_name" value="{{student.last_name if student else ''}}" required>
         </div>
 
-        <div class="form-group">
-            <label>Date of Birth:</label>
-            <input type="date" class="form-control" name="dob" value="{{ student.dob if student else '' }}">
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="dob" class="form-label">Date of Birth</label>
+            <input type="date" class="form-control" id="dob" name="dob"
+                value="{{student.dob if student else  ''}}">
         </div>
 
-        <div class="form-group">
-            <label>Aadhar Number:</label>
-            <input type="text" class="form-control" name="aadhar_number" value="{{ student.aadhar_number if student else '' }}">
+               
+        <div class="mb-3 form-el-div-wraper">
+            <label for="aadhar_number" class="form-label">Aadhar Number</label>
+            <input type="text" name="aadhar_number" value="{{student.aadhar_number if student else ''}}" required>
         </div>
 
-        <div class="form-group">
-            <label>Photo:</label>
-            <input type="file" class="form-control" name="photo">
+        <div class="mb-3 form-el-div-wraper">
+            <label for="photo" class="form-label">Photo</label>
+            <input type="file" name="photo" value="{{student.photo if student else ''}}" required>
         </div>
 
-        <div class="form-group">
-            <label>Date of Admission:</label>
-            <input type="date" class="form-control" name="date_of_admission" value="{{ student.date_of_admission if student else '' }}">
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="date_of_admission" class="form-label">Date of Admission</label>
+            <input type="date" class="form-control" id="date_of_admission" name="date_of_admission"
+                value="{{student.date_of_admission if student else ''}}">
         </div>
 
-        <div class="form-group">
-            <label>Admission Number:</label>
-            <input type="text" class="form-control" name="admission_number" value="{{ student.admission_number if student else '' }}">
+        
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="admission_number" class="form-label">Admission Number</label>
+            <input type="text" name="admission_number" value="{{student.admission_number if student else ''}}" required>
         </div>
 
-        <div class="form-group">
-            <label>Identification Mark:</label>
-            <input type="text" class="form-control" name="identification_mark" value="{{ student.identification_mark if student else '' }}">
+        <div class="mb-3 form-el-div-wraper">
+            <label for="identification_mark" class="form-label">Identification Mark</label>
+            <input type="text" name="identification_mark" value="{{student.identification_mark if student else ''}}" required>
         </div>
 
-        <div class="form-group">
-            <label>Interests:</label>
-            <input type="text" class="form-control" name="interests" value="{{ student.interests if student else '' }}">
+        <div class="mb-3 form-el-div-wraper">
+            <label for="interests" class="form-label">Interests</label>
+            <input type="text" name="interests" value="{{ student.interests if student else ''}}" required>
         </div>
 
-        <div class="form-group">
-            <label>Hobbies:</label>
-            <input type="text" class="form-control" name="hobbies" value="{{ student.hobbies if student else '' }}">
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="hobbies" class="form-label">Hobbies</label>
+            <input type="text" name="hobbies" value="{{ student.hobbies if student else '' }}" required>
         </div>
 
-        <div class="form-group">
-            <label>Email:</label>
-            <input type="email" class="form-control" name="student_email" value="{{ student.student_email if student else '' }}">
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="student_email" class="form-label">Email</label>
+            <input type="email" name="student_email" value="{{ student.student_email if student else ''  }}" required>
         </div>
 
-        <div class="form-group">
-            <label>Religion:</label>
-            <input type="text" class="form-control" name="religion" value="{{ student.religion if student else '' }}">
+        
+        <div class="mb-3 form-el-div-wraper">
+            <label for="caste" class="form-label">Caste</label>
+            <input type="text" name="caste" value="{{  student.caste if student else '' }}" required>
         </div>
 
-        <div class="form-group">
-            <label>Caste:</label>
-            <input type="text" class="form-control" name="caste" value="{{ student.caste if student else '' }}">
+        <div class="mb-3 form-el-div-wraper">
+            <label for="permanent_address" class="form-label">Permanent Address</label>
+            <textarea class="form-control" id="permanent_address"
+                name="permanent_address">{{student.permanent_address if student else ''}}</textarea>
         </div>
 
-        <div class="form-group">
-            <label>Permanent Address:</label>
-            <textarea class="form-control" name="permanent_address">{{ student.permanent_address if student else '' }}</textarea>
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="communication_address" class="form-label">Communication Address</label>
+            <textarea class="form-control" id="communication_address"
+                name="communication_address">{{student.communication_address if student else ''}}</textarea>
         </div>
 
-        <div class="form-group">
-            <label>Communication Address:</label>
-            <textarea class="form-control" name="communication_address">{{ student.communication_address if student else '' }}</textarea>
+        <div class="mb-3 form-el-div-wraper">
+            <label for="father_name" class="form-label">Father Name</label>
+            <input type="text" name="father_name" value="{{  student.father_name if student else '' }}" required>
         </div>
 
-        <div class="form-group">
-            <label>Mother Name:</label>
-            <input type="text" class="form-control" name="mother_name" value="{{ student.mother_name if student else '' }}">
+        <div class="mb-3 form-el-div-wraper">
+            <label for="mother_name" class="form-label">Mother Name</label>
+            <input type="text" name="mother_name" value="{{  student.mother_name if student else '' }}" required>
+        </div>
+        
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="father_qualification" class="form-label">Father Qualification</label>
+            <input type="text" name="father_qualification" value="{{  student.father_qualification if student else '' }}" required>
         </div>
 
-        <div class="form-group">
-            <label>Father Name:</label>
-            <input type="text" class="form-control" name="father_name" value="{{ student.father_name if student else '' }}">
+        <div class="mb-3 form-el-div-wraper">
+            <label for="mother_qualification" class="form-label">Mother Qualification</label>
+            <input type="text" name="mother_qualification" value="{{  student.mother_qualification if student else '' }}" required>
+        </div>
+        
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="father_occupation" class="form-label">Father Occupation</label>
+            <input type="text" name="father_occupation" value="{{  student.father_occupation if student else '' }}" required>
+        </div>
+             
+        <div class="mb-3 form-el-div-wraper">
+            <label for="mother_occupation" class="form-label">Mother Occupation</label>
+            <input type="text" name="mother_occupation" value="{{  student.mother_occupation if student else '' }}" required>
         </div>
 
-        <div class="form-group">
-            <label>Father Qualification:</label>
-            <input type="text" class="form-control" name="father_qualification" value="{{ student.father_qualification if student else '' }}">
+        <div class="mb-3 form-el-div-wraper">
+            <label for="father_mobile" class="form-label">Father Mobile</label>
+            <input type="text" name="father_mobile" value="{{  student.father_mobile if student else '' }}" required>
         </div>
 
-        <div class="form-group">
-            <label>Mother Qualification:</label>
-            <input type="text" class="form-control" name="mother_qualification" value="{{ student.mother_qualification if student else '' }}">
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="mother_mobile" class="form-label">Mother Mobile</label>
+            <input type="text" name="mother_mobile" value="{{  student.mother_mobile if student else '' }}" required>
+        </div>
+        
+        <div class="mb-3 form-el-div-wraper">
+            <label for="father_email" class="form-label">Father Email</label>
+            <input type="email" name="father_email" value="{{ student.father_email if student else ''  }}" required>
         </div>
 
-        <div class="form-group">
-            <label>Father Occupation:</label>
-            <input type="text" class="form-control" name="father_occupation" value="{{ student.father_occupation if student else '' }}">
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="mother_email" class="form-label">Mother Email</label>
+            <input type="email" name="mother_email" value="{{ student.mother_email if student else ''  }}" required>
         </div>
 
-        <div class="form-group">
-            <label>Mother Occupation:</label>
-            <input type="text" class="form-control" name="mother_occupation" value="{{ student.mother_occupation if student else '' }}">
+        <div class="mb-3 form-el-div-wraper">
+            <label for="annual_income" class="form-label">Annual Income</label>
+            <input type="text" name="annual_income" value="{{  student.annual_income if student else '' }}" required>
         </div>
 
-        <div class="form-group">
-            <label>Father Mobile:</label>
-            <input type="text" class="form-control" name="father_mobile" value="{{ student.father_mobile if student else '' }}">
+        <div class="mb-3 form-el-div-wraper">
+            <label for="blood_group" class="form-label">Blood Group</label>
+            <input type="text" name="blood_group" value="{{  student.blood_group if student else '' }}" required>
         </div>
 
-        <div class="form-group">
-            <label>Mother Mobile:</label>
-            <input type="text" class="form-control" name="mother_mobile" value="{{ student.mother_mobile if student else '' }}">
+        <div class="mb-3 form-el-div-wraper">
+            <label for="mother_tongue" class="form-label">Mother Tongue</label>
+            <input type="text" name="mother_tongue" value="{{  student.mother_tongue if student else '' }}" required>
         </div>
 
-        <div class="form-group">
-            <label>Father Email:</label>
-            <input type="email" class="form-control" name="father_email" value="{{ student.father_email if student else '' }}">
+        <div class="mb-3 form-el-div-wraper">
+            <label for="is_single_girl" class="form-label">Is Single Girl</label>
+            <input type="checkbox" name="is_single_girl" {% if student and student.is_single_girl %}checked{% endif %} required>
         </div>
 
-        <div class="form-group">
-            <label>Mother Email:</label>
-            <input type="email" class="form-control" name="mother_email" value="{{ student.mother_email if student else '' }}">
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="is_minority" class="form-label">Is Minority</label>
+            <input type="checkbox" name="is_minority" {% if student and student.is_minority %}checked{% endif %} required>
         </div>
 
-        <div class="form-group">
-            <label>Annual Income:</label>
-            <input type="text" class="form-control" name="annual_income" value="{{ student.annual_income if student else '' }}">
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="sibling_status" class="form-label">Sibling Status</label>
+            <input type="checkbox" name="sibling_status" {% if student and student.sibling_status %}checked{% endif %} required>
         </div>
 
-        <div class="form-group">
-            <label>Blood Group:</label>
-            <input type="text" class="form-control" name="blood_group" value="{{ student.blood_group if student else '' }}">
+        
+        <div class="mb-3 form-el-div-wraper">
+            <label for="relieving_date" class="form-label">Relieving Date</label>
+            <input type="date" class="form-control" id="relieving_date" name="dob"
+                value="{{student.relieving_date if student else  ''}}">
         </div>
 
-        <div class="form-group">
-            <label>Mother Tongue:</label>
-            <input type="text" class="form-control" name="mother_tongue" value="{{ student.mother_tongue if student else '' }}">
+        
+        <div class="mb-3 form-el-div-wraper">
+            <label for="relieving_comment" class="form-label">Relieving Comment</label>
+            <textarea class="form-control" id="relieving_comment"
+                name="relieving_comment">{{student.relieving_comment if student else ''}}</textarea>
         </div>
 
-        <div class="form-group">
-            <label>Is Single Girl:</label>
-            <input type="checkbox" name="is_single_girl" {% if student and student.is_single_girl %}checked{% endif %}>
-        </div>
+                  
 
-        <div class="form-group">
-            <label>Is Minority:</label>
-            <input type="checkbox" name="is_minority" {% if student and student.is_minority %}checked{% endif %}>
-        </div>
-
-        <div class="form-group">
-            <label>Sibling Status:</label>
-            <input type="checkbox" name="sibling_status" {% if student and student.sibling_status %}checked{% endif %}>
-        </div>
-
-        <div class="form-group">
-            <label>Relieving Date:</label>
-            <input type="date" class="form-control" name="relieving_date" value="{{ student.relieving_date if student else '' }}">
-        </div>
-
-        <div class="form-group">
-            <label>Relieving Comment:</label>
-            <textarea class="form-control" name="relieving_comment">{{ student.relieving_comment if student else '' }}</textarea>
-        </div>
-
-        <div class="form-group">
-            <label>Status:</label>
+        <div class="mb-3 form-el-div-wraper">
+            <label>Status</label>
             <select class="form-control" name="status">
                 <option value="1" {% if student and student.status == 1 %}selected{% endif %}>Passed</option>
                 <option value="0" {% if student and student.status == 0 %}selected{% endif %}>Failed</option>
             </select>
         </div>
 
+    </fieldset>
+
+
         <!-- User Details -->
-        <h3>User Details</h3>
-        <div class="form-group">
-            <label>Username:</label>
-            <input type="text" class="form-control" name="username" value="{{ users.username if users else '' }}" required>
-        </div>
 
-        <div class="form-group">
-            <label>Password:</label>
-            <input type="password" class="form-control" name="password" {% if not users %}required{% endif %}>
-        </div>
+        <fieldset>
+            <legend>User Details</legend>
 
-        <div class="form-group">
-            <label>Active:</label>
+
+            <div class="mb-3 form-el-div-wraper">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" name="username" value="{{  users.username if student else '' }}" required>
+            </div>
+
+            <div class="mb-3 form-el-div-wraper">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" name="password" {% if not users %}required{% endif %}>
+            </div>
+            
+        
+
+            <div class="mb-3 form-el-div-wraper">
+                <label for="is_active" class="form-label">Active</label>
             <input type="checkbox" name="is_active" {% if users and users.is_active %}checked{% endif %}>
         </div>
 
-        <h4 class="mt-4">Additional Information</h4>
-        <div class="form-group">
-            <label for="house_id">House:</label>
-            <select id="house_id" name="house_id" class="form-control">
-                <option value="">Select House</option>
-                {% for house in houses %}
-                <option value="{{ house.id }}" {% if school_student and school_student.house_id == house.id %}selected{% endif %}>
-                    {{ house.title }}
-                </option>
-                {% endfor %}
-            </select>
-        </div>
+        </fieldset>
+            
+        <fieldset>
+            <legend>Additional Information</legend>
 
-        <div class="form-group">
-            <label for="clubs">Clubs:</label>
-            <input
+            <div class="mb-3 form-el-div-wraper">
+                <label for="house_id" class="form-label">House</label>
+                <select id="house_id" name="house_id" class="form-control">
+                    <option value="">Select House</option>
+                    {% for house in houses %}
+                    <option value="{{ house.id }}" {% if school_student and school_student.house_id == house.id %}selected{% endif %}>
+                        {{ house.title }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3 form-el-div-wraper">
+                <label for="clubs" class="form-label">Clubs</label>
+                <input
                 type="text"
                 id="clubs"
                 name="clubs"
                 class="form-control"
                 placeholder="Enter comma-separated club IDs"
                 value="{{ school_student.clubs if school_student else '' }}"
-            />
+                >
         </div>
-
-        <div class="form-group">
-            <label for="school_grade_section_id">Grade Section:</label>
+        
+        
+        <div class="mb-3 form-el-div-wraper">
+            <label for="school_grade_section_id" class="form-label">Grade Section</label>
             <select id="school_grade_section_id" name="school_grade_section_id" class="form-control" required>
                 <option value="">Select Grade Section</option>
                 {% for section in grade_sections %}
@@ -244,9 +288,10 @@
                 {% endfor %}
             </select>
         </div>
-
-        <div class="form-group">
-            <label for="academic_year_id">Academic Year:</label>
+                
+                
+        <div class="mb-3 form-el-div-wraper">
+            <label for="academic_year_id" class="form-label">Academic Year</label>
             <select id="academic_year_id" name="academic_year_id" class="form-control" required>
                 <option value="">Select Academic Year</option>
                 {% for year in academic_years %}
@@ -257,8 +302,10 @@
             </select>
         </div>
 
-        <div class="form-group">
-            <label for="transport_id">Transport:</label>
+        
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="transport_id" class="form-label">Transport</label>
             <select id="transport_id" name="transport_id" class="form-control">
                 <option value="">Select Transport</option>
                 {% for transport in transports %}
@@ -269,15 +316,21 @@
             </select>
         </div>
 
-        <div class="form-group">
-            <label for="status">Status:</label>
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="status" class="form-label">Status</label>
             <select id="status" name="status" class="form-control">
                 <option value="1" {% if school_student and school_student.status %}selected{% endif %}>Active</option>
                 <option value="0" {% if school_student and not school_student.status %}selected{% endif %}>Inactive</option>
             </select>
         </div>
+    </fieldset>
 
-        <button type="submit" class="btn btn-primary">Save</button>
+    <div class="button-container">
+        <button type="submit" class="btn btn-primary">{{ 'Save' if student else 'Add' }}</button>
+    <a href="/students/list" class="btn btn-secondary">Cancel</a>
+     </div>
+       
     </form>
 </div>
 {% endblock %}

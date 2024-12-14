@@ -66,6 +66,7 @@ h5{
 .main {
     margin-left: 150px;
     padding: 20px;
+    min-height: 75vh;
 }
 .logo img{
     height: 22px;
@@ -132,6 +133,7 @@ footer{
     padding: 10px 0;
     bottom: 0;
     width: 100%;
+    clear: both;
 }
 footer a, footer a:active, footer a:visited{
     color: #006093 !important;
@@ -189,6 +191,23 @@ footer a, footer a:active, footer a:visited{
     background-color: #dc3545;
 }
 
+/*Filter section */
+.filters-container{
+    padding: 10px 5px;
+    border:1px groove #006093;
+    border-radius: 5px;
+    margin: 20px 0;
+}
+.filters-container label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-right: 10px;
+}
+.filters-container select {
+    margin-right: 20px;
+    padding: 10px 5px;
+    border: 1px groove #006093;
+}
 /*Forms */
 .form-el-div-wraper {
     padding: 10px 25px;
