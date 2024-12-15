@@ -168,6 +168,7 @@ class Staff(db.Model):
 
     school = db.relationship('School', backref='staffs')
     staff_type = db.relationship('StaffType', backref='staffs')
+    staffs_grades = db.relationship('StaffsGrades', back_populates='staff')
 
 class Club(db.Model):
     __tablename__ = 'clubs'
@@ -329,3 +330,57 @@ class SchoolStudent(db.Model):
 
     def __repr__(self):
         return f"<SchoolStudent(id={self.id}, student_id={self.student_id}, status={self.status})>"
+    
+class Subject(db.Model):
+    __tablename__ = 'subjects'
+
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
+    title = db.Column(db.String, nullable=False)
+
+    school = db.relationship('School', backref='subjects', lazy=True)
+
+    def __repr__(self):
+        return f"<Subject id={self.id}, title={self.title}, school_id={self.school_id}>"
+
+
+    
+class StaffsGrades(db.Model):
+    __tablename__ = 'staffs_grades'
+
+    id = db.Column(db.Integer, primary_key=True)
+    schools_grades_sections_id = db.Column(db.Integer, db.ForeignKey('schools_grades_sections.id'), nullable=True)
+    staff_id = db.Column(db.Integer, db.ForeignKey('staffs.id'), nullable=False)
+    subject_id = db.Column(db.Integer, db.ForeignKey('subjects.id'), nullable=True)
+    transport_id = db.Column(db.Integer, db.ForeignKey('transports.id'), nullable=True)
+    is_class_in_charge = db.Column(db.Boolean, nullable=False, default=False)
+    is_class_in_charge_second = db.Column(db.Boolean, nullable=False, default=False)
+    is_transport_in_charge = db.Column(db.Boolean, nullable=False, default=False)
+    class_in_charge_id = db.Column(db.Integer, db.ForeignKey('schools_grades_sections.id'), nullable=False)    
+    class_in_charge_second_id = db.Column(db.Integer, db.ForeignKey('schools_grades_sections.id'), nullable=False)
+
+    # Relationships
+    school_grade_section = db.relationship(
+        'SchoolsGradesSections', 
+        foreign_keys=[schools_grades_sections_id]
+    )
+    staff = db.relationship('Staff', back_populates='staffs_grades')
+    subject = db.relationship('Subject')
+    transport = db.relationship('Transport')
+    class_in_charge_section = db.relationship(
+        'SchoolsGradesSections', 
+        foreign_keys=[class_in_charge_id]
+    )
+    class_in_charge_second_section = db.relationship(
+        'SchoolsGradesSections', 
+        foreign_keys=[class_in_charge_second_id]
+    )
+    schools_grades_sections = db.relationship(
+        'SchoolsGradesSections',
+        backref='staffs_grades',
+        foreign_keys=[schools_grades_sections_id]  # Specify the foreign key explicitly
+    )
+    def __repr__(self):
+        return f"<StaffsGrades id={self.id}, staff_id={self.staff_id}, schools_grades_sections_id={self.schools_grades_sections_id}>"
+    
+

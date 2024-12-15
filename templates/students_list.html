@@ -20,7 +20,7 @@
     <div class="filters-container mb-3">
         <label for="grade-filter">Grade:</label>
         <select id="grade-filter" class="form-control">
-            <option value="">All Grades</option>
+            <option value=""> - All - </option>
             {% for grade in grades %}
             <option value="{{ grade.id }}">{{ grade.title }}</option>
             {% endfor %}
@@ -28,11 +28,18 @@
 
         <label for="section-filter" class="ml-3">Section:</label>
         <select id="section-filter" class="form-control">
-            <option value="">All Sections</option>
+            <option value=""> - All - </option>
             {% for section in sections %}
             <option value="{{ section.id }}">{{ section.title }}</option>
             {% endfor %}
         </select>
+        <label for="academic_year-filter" class="ml-3">Academic Year:</label>
+        <select id="academic_year-filter" class="form-control">
+            <option value=""> - All - </option> 
+            {% for academic_year in academic_years %}
+            <option value="{{ academic_year.id }}">{{ academic_year.start_date }} - {{ academic_year.end_date }}</option>
+            {% endfor %}
+        </select>        
     </div>
     <table id="studentsTable" class="display">
         <thead>
@@ -66,6 +73,7 @@
                 data: function (d) {
                     d.grade_id = $('#grade-filter').val();
                     d.section_id = $('#section-filter').val();
+                    d.academic_year_id = $('#academic_year-filter').val();
                 }
             },
             columns: [
@@ -100,7 +108,7 @@
                 },
             ],
         });
-        $('#grade-filter, #section-filter').on('change', function () {
+        $('#grade-filter, #section-filter, #academic_year-filter').on('change', function () {
             $('#studentsTable').DataTable().ajax.reload();
         });
     });

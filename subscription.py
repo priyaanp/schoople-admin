@@ -3,7 +3,7 @@ from flask import session as flask_session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text 
-from models import Club, Grade, House, SchoolStudent, SchoolsGradesSections, Section, Student, Transport, db, Offer,Subscription,Role,User,UserRole,Permission,School,AcademicYear,SchoolSubscription,Module,SchoolSubscriptionModuleRolePermission,StaffType,Staff
+from models import Club, Grade, House, SchoolStudent, SchoolsGradesSections, Section, StaffsGrades, Student, Subject, Transport, db, Offer,Subscription,Role,User,UserRole,Permission,School,AcademicYear,SchoolSubscription,Module,SchoolSubscriptionModuleRolePermission,StaffType,Staff
 from werkzeug.security import check_password_hash
 from config import DevelopmentConfig, TestingConfig, ProductionConfig
 
@@ -1678,6 +1678,7 @@ def get_students():
     school_id = session.get('school_id')  # Ensure school_id is fetched from the session
     grade_id = request.args.get('grade_id')
     section_id = request.args.get('section_id')
+    academic_year_id = request.args.get('academic_year_id')
 
     # Query students based on filters
     query = db.session.query(
@@ -1714,6 +1715,9 @@ def get_students():
     # Apply section filter
     if section_id:
         query = query.filter(SchoolsGradesSections.section_id == section_id)
+
+    if academic_year_id:
+        query = query.filter(SchoolsGradesSections.academic_year_id == academic_year_id)
 
     students = query.all()
 
@@ -1947,10 +1951,14 @@ def list_students():
         SchoolsGradesSections, Section.id == SchoolsGradesSections.section_id
     ).filter(SchoolsGradesSections.school_id == school_id).all()
 
+    academic_years = AcademicYear.query.join(
+        SchoolsGradesSections, AcademicYear.id == SchoolsGradesSections.academic_year_id
+    ).filter(SchoolsGradesSections.school_id == school_id).all()
     return render_template(
         'students_list.html',
         grades=grades,
-        sections=sections
+        sections=sections,
+        academic_years=academic_years
     )
 
 
@@ -2354,5 +2362,273 @@ def delete_transport(id):
     return jsonify({"message": "Transport deleted successfully"})
 
 
+@app.route('/staff_assignment/list', methods=['GET'])
+def staffs_grades_list():
+    """Render the list page."""
+    return render_template('staffs_grades_list.html')
+
+@app.route('/api/staff_assignment', methods=['GET'])
+def get_staffs_grades():
+    """Fetch Staff Grades data, filtered by school."""
+    school_id = session.get('school_id')
+    print("school_id")
+    print(school_id)
+    if not school_id:
+        return jsonify({"error": "School ID not found in session"}), 400
+
+    # Get all schools_grades_sections filtered by school_id
+    schools_grades_sections = SchoolsGradesSections.query.filter_by(school_id=school_id).all()
+
+    # Create a mapping of schools_grades_sections by id for easy lookup
+    sgs_mapping = {sgs.id: sgs for sgs in schools_grades_sections}
+
+    # Fetch staff grades
+    staff_grades = StaffsGrades.query.filter(
+        StaffsGrades.schools_grades_sections_id.in_(sgs_mapping.keys())
+    ).all()
+
+    data = [
+        {
+            "id": sg.id,
+            "staff": f"{sg.staff.first_name} {sg.staff.last_name}" if sg.staff else "N/A",
+            "grade": sgs_mapping[sg.schools_grades_sections_id].grade.title if sg.schools_grades_sections_id in sgs_mapping else "N/A",
+            "division": sgs_mapping[sg.schools_grades_sections_id].section.title if sg.schools_grades_sections_id in sgs_mapping else "N/A",
+            "subject": sg.subject.title if sg.subject else "N/A",
+            "is_class_in_charge": sg.is_class_in_charge,
+            "is_class_in_charge_second": sg.is_class_in_charge_second,
+            "transport": sg.transport.route_name if sg.transport else "N/A",
+        }
+        for sg in staff_grades
+    ]
+
+    return jsonify({"data": data})
+
+
+
+
+@app.route('/staff_assignment/add', methods=['GET', 'POST'])
+@app.route('/staff_assignment/edit/<int:id>', methods=['GET', 'POST'])
+def add_edit_staffs_grades(id=None):
+    """Add or Edit Staff Grade."""
+    # Fetch existing data for editing if an ID is provided
+    print("Received ID:", id)
+
+    staff_grade = StaffsGrades.query.get(id) if id else None
+
+    # Fetch dropdown data for form rendering
+
+
+    # Ensure school_id is available in session
+    school_id = session.get('school_id')
+    if not school_id:
+        return jsonify({"error": "School ID not found in session"}), 400
+
+    # Initialize variables
+    staff_grade = StaffsGrades.query.get(id) if id else None
+
+    # Fetch dropdown data
+    staffs = Staff.query.filter_by(school_id=school_id).all()  # Filter by school
+    grades = Grade.query.all()  # Retrieve all grades
+    divisions = Section.query.all()  # Retrieve all divisions
+    subjects = Subject.query.filter_by(school_id=school_id).all()  # Filter by school
+    transports = Transport.query.filter_by(school_id=school_id).all()  # Filter by school
+
+
+
+    # Handle POST request (save the data)
+    if request.method == 'POST':
+        staff_id = request.form['staff_id']
+        is_class_in_charge = request.form.get('is_class_in_charge') == 'true'
+        is_class_in_charge_second = request.form.get('is_class_in_charge_second') == 'true'
+        is_transport_in_charge = request.form.get('is_transport_in_charge') == 'true'
+
+        transport_id = request.form.get('transport_id') or None
+
+        grades_list = request.form.getlist('grades[]')
+        divisions_list = request.form.getlist('divisions[]')
+        subjects_list = request.form.getlist('subjects[]')
+        class_in_charge_grade = request.form['class_in_charge_grade']
+        class_in_charge_division = request.form['class_in_charge_division']
+        class_in_charge_second_grade = request.form['class_in_charge_second_grade']
+        class_in_charge_second_division = request.form['class_in_charge_second_division']
+
+
+
+        # Handle Edit
+        if id:
+            for grade_id, division_id, subject_id in zip(grades_list, divisions_list, subjects_list):
+                sgs = SchoolsGradesSections.query.filter_by(
+                    school_id=school_id,
+                    grade_id=grade_id,
+                    section_id=division_id
+                ).first()
+
+                if not sgs:
+                    return jsonify({"error": "Invalid grade or division selection"}), 400
+                sgs1 = SchoolsGradesSections.query.filter_by(
+                    school_id=school_id,
+                    grade_id=class_in_charge_grade,
+                    section_id=class_in_charge_division
+                ).first()
+                sgs2 = SchoolsGradesSections.query.filter_by(
+                    school_id=school_id,
+                    grade_id=class_in_charge_second_grade,
+                    section_id=class_in_charge_second_division
+                ).first()  
+
+            if staff_grade:
+ 
+    
+                staff_grade.schools_grades_sections_id=sgs.id
+                staff_grade.subject_id=subject_id
+                staff_grade.staff_id=staff_id
+                staff_grade.is_class_in_charge=bool(is_class_in_charge)
+                staff_grade.class_in_charge_id=sgs1.id
+                staff_grade.is_class_in_charge_second=bool(is_class_in_charge_second)
+                staff_grade.is_transport_in_charge = bool(is_transport_in_charge)
+                staff_grade.class_in_charge_second_id=sgs2.id
+                staff_grade.transport_id=transport_id
+                db.session.commit()
+
+        # Handle Add
+        else:
+            print("222222222222222222222222222222")
+            for grade_id, division_id, subject_id in zip(grades_list, divisions_list, subjects_list):
+                sgs = SchoolsGradesSections.query.filter_by(
+                    school_id=school_id,
+                    grade_id=grade_id,
+                    section_id=division_id
+                ).first()
+
+                if not sgs:
+                    return jsonify({"error": "Invalid grade or division selection"}), 400
+                sgs1 = SchoolsGradesSections.query.filter_by(
+                    school_id=school_id,
+                    grade_id=class_in_charge_grade,
+                    section_id=class_in_charge_division
+                ).first()
+                sgs2 = SchoolsGradesSections.query.filter_by(
+                    school_id=school_id,
+                    grade_id=class_in_charge_second_grade,
+                    section_id=class_in_charge_second_division
+                ).first()   
+          
+                new_staff_grade = StaffsGrades(
+                    schools_grades_sections_id=sgs.id,
+                    subject_id=subject_id,
+                    staff_id=staff_id,
+                    is_class_in_charge=is_class_in_charge,
+                    class_in_charge_id=sgs1.id,
+                    is_class_in_charge_second=is_class_in_charge_second,
+                    is_transport_in_charge=is_transport_in_charge,
+                    class_in_charge_second_id=sgs2.id,
+                    transport_id=transport_id
+                )
+                db.session.add(new_staff_grade)
+                
+
+        db.session.commit()
+
+        return redirect(url_for('staffs_grades_list'))
+
+
+
+    # Render the form with the existing data if editing
+    # Prepare rows for edit form (if editing)
+    rows = []
+    if staff_grade:
+        rows = [
+            {
+                "subject_id": sg.subject_id,
+                "grade_id": sg.schools_grades_sections.grade_id,
+                "division_id": sg.schools_grades_sections.section_id,
+            }
+           # for sg in StaffsGrades.query.filter_by(staff_id=staff_grade.staff_id).all()
+           for sg in StaffsGrades.query.filter_by(id=id).all()
+        ]
+    print("aaaaaaaaaaaaaaaaaaaaaaaa00",rows)
+    return render_template(
+        'staffs_grades_form.html',
+        staffs_grades=staff_grade,
+        rows=rows,
+        staffs=staffs,
+        grades=grades,
+        divisions=divisions,
+        subjects=subjects,
+        transports=transports
+    )
+
+
+@app.route('/staff_assignment/delete/<int:id>', methods=['POST'])
+def delete_staffs_grades(id):
+    """Delete a Staff Grade entry."""
+    staff_grade = StaffsGrades.query.get(id)
+    if staff_grade:
+        db.session.delete(staff_grade)
+        db.session.commit()
+        return jsonify({'success': True})
+    return jsonify({'error': 'Not found'}), 404
+
+
+
+@app.route('/subjects', methods=['GET'])
+def subjects_list():
+    """Render the list page."""
+    return render_template('subjects_list.html')
+
+
+@app.route('/subjects/add', methods=['GET', 'POST'])
+@app.route('/subjects/edit/<int:id>', methods=['GET', 'POST'])
+def subjects_add_edit(id=None):
+    """Add or Edit a Subject."""
+    subject = Subject.query.get(id) if id else None
+    school_id = session.get('school_id')  # School is taken from the session
+
+    if request.method == 'POST':
+        title = request.form['title']
+
+        if subject:
+            # Edit existing subject
+            subject.title = title
+        else:
+            # Add a new subject
+            subject = Subject(
+                school_id=school_id,
+                title=title
+            )
+            db.session.add(subject)
+
+        db.session.commit()
+        return redirect(url_for('subjects_list'))
+
+    return render_template('subjects_form.html', subject=subject)
+
+
+@app.route('/subjects/delete/<int:id>', methods=['POST'])
+def subjects_delete(id):
+    """Delete a Subject."""
+    subject = Subject.query.get(id)
+    if subject:
+        db.session.delete(subject)
+        db.session.commit()
+        return jsonify({'success': True})
+    return jsonify({'error': 'Subject not found'}), 404
+
+
+@app.route('/api/subjects', methods=['GET'])
+def api_subjects_list():
+    """API for fetching the subjects list."""
+    school_id = session.get('school_id')  # Filter subjects by the current school
+    subjects = Subject.query.filter_by(school_id=school_id).all()
+
+    data = [
+        {
+            "id": subject.id,
+            "title": subject.title,
+            "school": subject.school.title if subject.school else "N/A",
+        }
+        for subject in subjects
+    ]
+    return jsonify({"data": data})
 if __name__ == '__main__':
     app.run(debug=True)

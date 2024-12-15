@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staffs Grades List</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <h2>Staffs Grades List</h2>
+
+        <a href="/staff_assignment/add" class="btn btn-primary mb-3">Add New Staff Grade</a>
+
+        <table id="staffsGradesTable" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Staff</th>
+                    <th>Grade</th>
+                    <th>Division</th>
+                    <th>Subject</th>
+                    <th>Class In-Charge</th>
+                    <th>Second Class In-Charge</th>
+                    <th>Transport In-Charge</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Populated dynamically with DataTables -->
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            const table = $('#staffsGradesTable').DataTable({
+    ajax: '/api/staff_assignment',
+    columns: [
+        {
+            data: 'id',
+            render: (data, type, row, meta) => meta.row + 1,
+        },
+        { data: 'staff' },
+        { data: 'grade' },
+        { data: 'division' },
+        { data: 'subject' },
+        { data: 'transport' },
+        { data: 'is_class_in_charge', render: data => data ? 'Yes' : 'No' },
+        { data: 'is_class_in_charge_second', render: data => data ? 'Yes' : 'No' },
+        {
+            data: 'id',
+            render: data => `
+                <a href="/staff_assignment/edit/${data}" class="btn btn-sm btn-primary">Edit</a>
+                <button class="btn btn-sm btn-danger" onclick="deleteStaffGrade(${data})">Delete</button>
+            `,
+        },
+    ],
+});
+
+
+            // Delete Row
+            window.deleteStaffGrade = function (id) {
+                if (confirm('Are you sure you want to delete this entry?')) {
+                    $.ajax({
+                        url: `/staff_assignment/delete/${id}`,
+                        method: 'POST',
+                        success: () => {
+                            table.ajax.reload();
+                            alert('Entry deleted successfully!');
+                        },
+                        error: () => alert('Failed to delete the entry.')
+                    });
+                }
+            };
+        });
+    </script>
+</body>
+</html>

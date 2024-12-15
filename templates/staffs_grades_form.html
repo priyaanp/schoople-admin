@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Grades Management</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <h2>{{ 'Edit' if staffs_grades else 'Add' }} Staff Grades Management</h2>
+        <!-- DataTable -->
+
+
+        <button class="btn btn-primary mt-3" onclick="showAddEditForm()">Add New Staff Grade</button>
+
+        <!-- Add/Edit Form -->
+        <div id="addEditForm" class="mt-4" >
+            <h3 id="form-title">Add/Edit Staff Grade</h3>
+            
+            <form id="staffForm" action="{{ url_for('add_edit_staffs_grades', id=staffs_grades.id) if staffs_grades else url_for('add_edit_staffs_grades') }}" method="POST">
+                <!-- Staff Select -->
+                <div class="form-group">
+                    <label for="staff_id">Staff:</label>
+                    <select id="staff_id" name="staff_id" class="form-control" required>
+                        <option value="">Select Staff</option>
+                        {% for staff in staffs %}
+                        
+                        <option value="{{ staff.id }}" {% if staffs_grades and staffs_grades.staff_id == staff.id %}selected{% endif %}>{{ staff.first_name }} {{ staff.last_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Dynamic Grade/Division/Subject Rows -->
+                <div class="mt-3">
+                    <h5>Grade, Division, Subject</h5>
+                    <div id="rows-container">
+                        {% if rows %}
+                            {% for row in rows %}
+                            <div class="row mb-2 grade-row">
+                                <div class="col-md-3">
+                                    <select class="form-control grade-select" name="grades[]">
+                                        <option value="">Select Grade</option>
+                                        {% for grade in grades %}
+                                        <option value="{{ grade.id }}" {% if row.grade_id == grade.id %}selected{% endif %}>
+                                            {{ grade.title }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-control division-select" name="divisions[]">
+                                        <option value="">Select Division</option>
+                                        {% for division in divisions %}
+                                        <option value="{{ division.id }}" {% if row.division_id == division.id %}selected{% endif %}>
+                                            {{ division.title }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-control subject-select" name="subjects[]">
+                                        <option value="">Select Subject</option>
+                                        {% for subject in subjects %}
+                                        <option value="{{ subject.id }}" {% if row.subject_id == subject.id %}selected{% endif %}>
+                                            {{ subject.title }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3" style="display: {% if staffs_grades %}none{% else %}block{% endif %};">
+                                    <button type="button" class="btn btn-success add-row">+</button>
+                                    <button type="button" class="btn btn-danger remove-row">-</button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <!-- Default Empty Row -->
+                            <div class="row mb-2 grade-row">
+                                <div class="col-md-3">
+                                    <select class="form-control grade-select" name="grades[]">
+                                        <option value="">Select Grade</option>
+                                        {% for grade in grades %}
+                                        <option value="{{ grade.id }}" {% if rows.grade_id == grade.id %}selected{% endif %}>
+                                            {{ grade.title }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-control division-select" name="divisions[]">
+                                        <option value="">Select Division</option>
+                                        {% for division in divisions %}
+                                        <option value="{{ division.id }}">{{ division.title }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-control subject-select" name="subjects[]">
+                                        <option value="">Select Subject</option>
+                                        {% for subject in subjects %}
+                                        <option value="{{ subject.id }}">{{ subject.title }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="button" class="btn btn-success add-row">+</button>
+                                    <button type="button" class="btn btn-danger remove-row">-</button>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                
+
+                <!-- Class In-Charge -->
+                <div class="form-group mt-3">
+                    <label><input type="checkbox" name="is_class_in_charge" id="is_class_in_charge" value="true" 
+                        {% if staffs_grades and staffs_grades.is_class_in_charge %}checked{% endif %}>
+                        Class In-Charge</label>
+                    <div id="class-in-charge-fields" style="display: {% if staffs_grades and staffs_grades.is_class_in_charge %}block{% else %}none{% endif %};" class="mt-2">
+                        <select class="form-control" name="class_in_charge_grade">
+                            <option value="">Select Grade</option>
+                            {% for grade in grades %}
+                            <option value="{{ grade.id }}" {% if staffs_grades and staffs_grades.class_in_charge_section.grade_id == grade.id %}selected{% endif %}>
+                                {{ grade.title }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <select class="form-control mt-2" name="class_in_charge_division">
+                            <option value="">Select Division</option>
+                            {% for division in divisions %}
+                            <option value="{{ division.id }}" {% if staffs_grades and staffs_grades.class_in_charge_section.section_id == division.id %}selected{% endif %}>{{ division.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Class Second In-Charge -->
+                <div class="form-group mt-3">
+                    <label>
+                        <input type="checkbox" name="is_class_in_charge_second" id="is_class_in_charge_second" value="true" 
+                        {% if staffs_grades and staffs_grades.is_class_in_charge_second %}checked{% endif %}>
+                        Class Second In-Charge
+                    </label>
+                    <div id="class-in-charge-second-fields" style="display: {% if staffs_grades and staffs_grades.is_class_in_charge_second %}block{% else %}none{% endif %};" class="mt-2">
+                        <select class="form-control" name="class_in_charge_second_grade">
+                            <option value="">Select Grade</option>
+                            {% for grade in grades %}
+                            <option value="{{ grade.id }}" {% if staffs_grades and staffs_grades.class_in_charge_second_section.grade_id == grade.id %}selected{% endif %}>{{ grade.title }}</option>
+                            {% endfor %}
+                        </select>
+                        <select class="form-control mt-2" name="class_in_charge_second_division">
+                            <option value="">Select Division</option>
+                            {% for division in divisions %}
+                            <option value="{{ division.id }}" {% if staffs_grades and staffs_grades.class_in_charge_second_section.section_id == division.id %}selected{% endif %}>{{ division.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Transport In-Charge -->
+                <div class="form-group mt-3">
+                    <label> 
+                        <input type="checkbox" name="is_transport_in_charge" id="is_transport_in_charge" value="true" 
+                        {% if staffs_grades and staffs_grades.is_transport_in_charge %}checked{% endif %}> Transport In-Charge
+                    </label>
+                    <div id="transport-fields" style="display: {% if staffs_grades and staffs_grades.is_transport_in_charge %}block{% else %}none{% endif %};" class="mt-2">
+                        <select class="form-control" name="transport_id">
+                            <option value="">Select Transport</option>
+                            {% for transport in transports %}
+                            <option value="{{ transport.id }}" {% if staffs_grades and staffs_grades and staffs_grades.transport_id == transport.id %}selected{% endif %}>{{ transport.route_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Save Button -->
+                <button type="submit" class="btn btn-primary mt-3">Save</button>
+                <button type="button" class="btn btn-secondary mt-3" onclick="hideAddEditForm()">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function () {
+ 
+
+            // Show Add/Edit Form
+            window.showAddEditForm = function () {
+                $('#addEditForm').show();
+            };
+
+            // Hide Add/Edit Form
+            window.hideAddEditForm = function () {
+                $('#addEditForm').hide();
+            };
+
+            // Dynamic Row Management
+            $(document).on('click', '.add-row', function () {
+                const rowHtml = $('.grade-row').first().clone();
+                $('#rows-container').append(rowHtml);
+            });
+
+            $(document).on('click', '.remove-row', function () {
+                if ($('#rows-container .grade-row').length > 1) {
+                    $(this).closest('.grade-row').remove();
+                }
+            });
+
+            // Class In-Charge Toggle
+            $('#is_class_in_charge').on('change', function () {
+                $('#class-in-charge-fields').toggle(this.checked);
+            });
+
+            // Class Second In-Charge Toggle
+            $('#is_class_in_charge_second').on('change', function () {
+                $('#class-in-charge-second-fields').toggle(this.checked);
+            });
+
+            // Transport In-Charge Toggle
+            $('#is_transport_in_charge').on('change', function () {
+                $('#transport-fields').toggle(this.checked);
+            });
+        });
+    </script>
+</body>
+</html>
