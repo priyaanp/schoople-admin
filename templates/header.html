@@ -1,4 +1,3 @@
-
 <div class="dashboard-header">
     <div class="logo">
         <a href="/dashboard"><img src="{{ url_for('static', filename='images/SCHOOPLE.png') }}"></a>
@@ -6,7 +5,7 @@
     
     <nav class="navbar">
         <div class="container-fluid">
-            <div class="action-container">
+            <div class="header-filter-container">
                 {% if session['is_superadmin'] %}
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item" id="school-select-container" style="display: none;">
@@ -21,9 +20,22 @@
                     </li>
                 </ul>
                 {% endif %}
-                <form action="/logout" method="POST" class="d-inline">
-                    <button class="logout-btn">Logout</button>
-                </form>
+            </div>
+            <div class="profile-container">
+                <div class="profile-view">
+                    <div class="profile-image">{{ session['username'][:1] }}</div>
+                    <div class="profile-name">{{ session['username'] }}</div>
+                </div>
+                <div class="profile-details">
+                    <div class="profile-info"><span class="welcome">Welcome</span> {{ session['username'] }} !</div>
+                    <div class="profile-logout">
+                        <form action="/logout" method="POST" class="d-inline">
+                            <button class="logout-btn">Logout</button>
+                        </form>
+                    </div>
+                    
+                </div>
+                
             </div>
             
         </div>

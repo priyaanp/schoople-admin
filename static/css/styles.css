@@ -73,16 +73,17 @@ h5{
 }
 .dashboard-header {
     background: linear-gradient(12deg, #93D1D7 35.39%, #177db4 98.3%);
-    display: flex;
+    display:flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px; 
+    padding: 10px 20px;
     position: sticky;
     top: 0;
 }
 
-.navbar .action-container {
-    width: 270px;
+.navbar .header-filter-container, .navbar .profile-container {
+    width: 200px;
+    float:left;    
 }
 .navbar-nav {
     width: 140px;
@@ -96,11 +97,69 @@ h5{
 .navbar-nav select option{
     padding: 10px 5px;
 }
-.action-container button{
+.profile-container .profile-view {
+    display:flex;
+    
+}
+.profile-container .profile-view .profile-image {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: #177db4;
     border: 1px groove #006093;
-    padding: 10px 15px;
-    border-radius: 5px;
-    margin-top: 9px;
+    font-size: 30px;
+    color: #fff;
+    text-align: center;
+    margin: 10px 0;
+    line-height: 35px;
+    text-transform: uppercase;
+}
+.profile-container .profile-view .profile-name {
+    font-size: 20px;
+    color: #fff;
+    margin: 18px 10px;
+    text-transform: capitalize;
+}
+.profile-container .profile-view .profile-name:hover {
+    text-decoration:underline;
+}
+.profile-container .profile-details {
+    height: 100px;
+    width: 200px;
+    background: linear-gradient(12deg, #93D1D7 35.39%, #177db4 98.3%);
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    position: absolute;
+    z-index: 10;
+}
+.profile-container .profile-details .profile-info {
+    height: 50px;
+    color:#FFF;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 10px;
+    text-transform: capitalize;
+}
+.profile-container .profile-details .profile-info .welcome {
+    color:#006093;
+}
+.profile-container .profile-details .profile-logout{
+
+    text-align: center;
+    border-top: 1px groove #177db4;
+}
+.profile-container button{
+    /* border: 1px groove #006093; */
+    /* padding: 10px 15px; */
+    /* border-radius: 5px; */
+    font-weight: 700;
+    color:#FFF;
+    background: none;
+    border: none;
+    margin-top: 5px;
+}
+.profile-container button:hover {
+    text-decoration: underline;
 }
 .sidebar{
     background: linear-gradient(127deg, #93D1D7 35.39%, #177db4 68.3%);
