@@ -1666,6 +1666,16 @@ SELECT pg_catalog.setval('public.attendences_id_seq', 1, false);
 
 COPY public.clubs (id, school_id, title, description, status) FROM stdin;
 1	1	Red	qAADSAD	t
+7	1	4	    4         	f
+8	1	5	  5           	f
+9	1	6	 6            	f
+10	1	7	7             	f
+11	1	8	 8            	f
+12	1	9	            0 	f
+13	1	10	 10            	f
+14	1	11	  11           	f
+5	1	test	            as              	t
+6	1	333	                         3 	t
 \.
 
 
@@ -1673,7 +1683,7 @@ COPY public.clubs (id, school_id, title, description, status) FROM stdin;
 -- Name: clubs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.clubs_id_seq', 4, true);
+SELECT pg_catalog.setval('public.clubs_id_seq', 14, true);
 
 
 --
@@ -1791,6 +1801,7 @@ SELECT pg_catalog.setval('public.holidays_id_seq', 1, false);
 
 COPY public.houses (id, school_id, title, description, color, status) FROM stdin;
 1	1	Red	Test1	Red	t
+2	1	raman	SEWFREGREGG	Green	t
 \.
 
 
@@ -1798,7 +1809,7 @@ COPY public.houses (id, school_id, title, description, color, status) FROM stdin
 -- Name: houses_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.houses_id_seq', 1, true);
+SELECT pg_catalog.setval('public.houses_id_seq', 2, true);
 
 
 --
@@ -1936,7 +1947,6 @@ SELECT pg_catalog.setval('public.school_subscription_id_seq', 4, true);
 --
 
 COPY public.school_subscription_module_role_permission (id, school_subscription_id, module_id, role_id, permission_id) FROM stdin;
-2	4	3	3	1
 4	4	4	2	1
 5	2	1	1	1
 1	4	1	1	6
@@ -1944,6 +1954,8 @@ COPY public.school_subscription_module_role_permission (id, school_subscription_
 7	4	5	3	1
 8	4	6	3	1
 9	4	11	3	2
+10	2	1	2	2
+2	4	3	3	1
 \.
 
 
@@ -1951,7 +1963,7 @@ COPY public.school_subscription_module_role_permission (id, school_subscription_
 -- Name: school_subscription_module_role_permission_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.school_subscription_module_role_permission_id_seq', 9, true);
+SELECT pg_catalog.setval('public.school_subscription_module_role_permission_id_seq', 10, true);
 
 
 --
@@ -1971,6 +1983,7 @@ COPY public.schools (id, code, title, description, address, phone, syllabus, sta
 COPY public.schools_grades_sections (id, school_id, grade_id, section_id, academic_year_id) FROM stdin;
 1	1	1	1	1
 2	1	1	2	4
+3	2	1	1	1
 \.
 
 
@@ -1978,14 +1991,14 @@ COPY public.schools_grades_sections (id, school_id, grade_id, section_id, academ
 -- Name: schools_grades_sections_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.schools_grades_sections_id_seq', 2, true);
+SELECT pg_catalog.setval('public.schools_grades_sections_id_seq', 3, true);
 
 
 --
 -- Name: schools_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.schools_id_seq', 2, true);
+SELECT pg_catalog.setval('public.schools_id_seq', 3, true);
 
 
 --
@@ -2013,6 +2026,8 @@ COPY public.staff_types (id, title) FROM stdin;
 1	Teacher
 6	Clerk
 7	HOD
+8	clerk
+9	HM
 \.
 
 
@@ -2020,7 +2035,7 @@ COPY public.staff_types (id, title) FROM stdin;
 -- Name: staff_types_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.staff_types_id_seq', 7, true);
+SELECT pg_catalog.setval('public.staff_types_id_seq', 9, true);
 
 
 --
@@ -2041,7 +2056,7 @@ COPY public.staffs (id, school_id, staff_type_id, first_name, middle_name, last_
 --
 
 COPY public.staffs_grades (id, schools_grades_sections_id, staff_id, subject_id, transport_id, is_class_in_charge, class_in_charge_id, is_class_in_charge_second, class_in_charge_second_id, is_transport_in_charge) FROM stdin;
-1	2	5	1	1	t	2	t	1	t
+1	1	5	1	1	t	2	t	1	t
 \.
 
 
