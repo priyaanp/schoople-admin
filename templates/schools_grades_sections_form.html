@@ -3,13 +3,20 @@
 {% block title %}{{ 'Edit' if section else 'Add' }} Schools Grades Sections{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>{{ 'Edit' if section else 'Add' }} Schools Grades Sections</h2>
-    <form method="POST">
+
+<div class="container mt-5 form-field-container">
+    <div class="form-page-header">
+        <h4>{{ 'Edit' if  section else 'Add' }} Schools Grades Sections</h4>
+    </div>
+  
+    <form method="post">
 
 
-        <div class="form-group">
-            <label for="grade_id">Grade:</label>
+
+        
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="grade_id" class="form-label">Grade</label>
             <select id="grade_id" name="grade_id" class="form-control" required>
                 {% for grade in grades %}
                 <option value="{{ grade.id }}" {% if section and grade.id == section.grade_id %}selected{% endif %}>
@@ -19,8 +26,8 @@
             </select>
         </div>
 
-        <div class="form-group">
-            <label for="section_id">Section:</label>
+        <div class="mb-3 form-el-div-wraper">
+            <label for="section_id" class="form-label">Section</label>
             <select id="section_id" name="section_id" class="form-control" required>
                 {% for section in sections %}
                 <option value="{{ section.id }}" {% if section and section.id == section.section_id %}selected{% endif %}>
@@ -30,8 +37,8 @@
             </select>
         </div>
 
-        <div class="form-group">
-            <label for="academic_year_id">Academic Year:</label>
+        <div class="mb-3 form-el-div-wraper">
+            <label for="academic_year_id" class="form-label">Academic Year</label>
             <select id="academic_year_id" name="academic_year_id" class="form-control" required>
                 {% for year in academic_years %}
                 <option value="{{ year.id }}" {% if section and year.id == section.academic_year_id %}selected{% endif %}>
@@ -40,6 +47,12 @@
                 {% endfor %}
             </select>
         </div>
+
+
+        <div class="button-container">
+            <button type="submit" class="btn btn-primary">{{ 'Save' if section else 'Add' }}</button>
+        <a href="/schools-grades-sections/list" class="btn btn-secondary">Cancel</a>
+         </div>
 
         <button type="submit" class="btn btn-primary mt-3">Save</button>
     </form>

@@ -3,9 +3,18 @@
 {% block title %}Houses List{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>Houses List</h2>
-    <a href="/houses/add" class="btn btn-primary mb-3">Add House</a>
+
+
+    <div class="data-table-wraper">
+        <div class="data-table-header">
+            <div class="data-table-header-text">
+                <h4>Houses List</h4>
+            </div>
+            <div class="data-table-header-add-new">
+                <button style="font-size:18px"><a href="/houses/add">Add <i class="fa fa-plus-circle"></i></a></button>
+            </div>
+            
+        </div>
     <table id="housesTable" class="table table-striped">
         <thead>
             <tr>

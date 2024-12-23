@@ -1,35 +1,67 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ school and 'Edit School' or 'Add School' }}</title>
-</head>
-<body>
-    <h1>{{ school and 'Edit School' or 'Add School' }}</h1>
+{% extends 'baseform.html' %}
+
+{% block title %}{{ 'Edit' if school else 'Add' }} School{% endblock %}
+
+{% block content %}
+
+
+<div class="container mt-5 form-field-container">
+    <div class="form-page-header">
+        <h4>{{ 'Edit' if  school else 'Add' }} School</h4>
+    </div>
+  
     <form method="post">
-        <label>Code:
+
+
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="code" class="form-label">Code</label>
             <input type="text" name="code" value="{{ school and school.code }}" required>
-        </label><br>
-        <label>Title:
+        </div>
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="title" class="form-label">Title</label>
             <input type="text" name="title" value="{{ school and school.title }}" required>
-        </label><br>
-        <label>Description:
-            <textarea name="description">{{ school and school.description }}</textarea>
-        </label><br>
-        <label>Address:
-            <textarea name="address">{{ school and school.address }}</textarea>
-        </label><br>
-        <label>Phone:
-            <input type="text" name="phone" value="{{ school and school.phone }}">
-        </label><br>
-        <label>Syllabus:
+        </div>
+
+
+
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="permanent_address"
+                name="description">{{school.description if school else ''}}</textarea>
+        </div>
+        
+        
+        
+        <div class="mb-3 form-el-div-wraper">
+            <label for="address" class="form-label"> Address</label>
+            <textarea class="form-control" id="permanent_address"
+                name="address">{{school.address if school else ''}}</textarea>
+        </div>
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="phone" class="form-label">Phone</label>
+            <input type="text" name="phone" value="{{ school and school.phone }}"> 
+        </div>
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="syllabus" class="form-label">Syllabus</label>
             <input type="text" name="syllabus" value="{{ school and school.syllabus }}">
-        </label><br>
-        <label>Status:
+        </div>
+
+        
+        <div class="mb-3 form-el-div-wraper">
+            <label for="status" class="form-label">Status</label>
             <input type="checkbox" name="status" {% if school and school.status %}checked{% endif %}>
-        </label><br>
-        <button type="submit">Save</button>
-    </form>
-</body>
-</html>
+            
+            </div>
+        
+        
+            <div class="button-container">
+                <button type="submit" class="btn btn-primary">{{ 'Save' if school else 'Add' }}</button>
+            <a href="/schools/list" class="btn btn-secondary">Cancel</a>
+             </div>
+        
+{% endblock %}

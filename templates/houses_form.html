@@ -3,22 +3,25 @@
 {% block title %}{{ 'Edit' if house else 'Add' }} House{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>{{ 'Edit' if house else 'Add' }} House</h2>
-    <form method="POST">
-        <div class="form-group">
-            <label for="title">Title:</label>
-            <input
-                type="text"
-                id="title"
-                name="title"
-                class="form-control"
-                value="{{ house.title if house else '' }}"
-                required
-            />
-        </div>
 
-        <div class="form-group">
+
+<div class="container mt-5 form-field-container">
+    <div class="form-page-header">
+        <h4>{{ 'Edit' if  house else 'Add' }} House</h4>
+    </div>
+  
+    <form method="post">
+
+      <div class="mb-3 form-el-div-wraper">
+            <label for="title" class="form-label">Title</label>
+            <input type="text" class="form-control" id="house" name="title"
+             value="{{house.title if house else ''}}" required>
+      </div>
+
+
+        
+
+        <div class="mb-3 form-el-div-wraper">
             <label for="description">Description:</label>
             <textarea
                 id="description"
@@ -28,19 +31,17 @@
             >{{ house.description if house else '' }}</textarea>
         </div>
 
-        <div class="form-group">
-            <label for="color">Color:</label>
-            <input
-                type="text"
-                id="color"
-                name="color"
-                class="form-control"
-                value="{{ house.color if house else '' }}"
-                required
-            />
+        <div class="mb-3 form-el-div-wraper">
+            <label for="color" class="form-label">Color</label>
+            <input type="text" class="form-control" id="color" name="color"
+             value="{{house.color if house else ''}}" required>
         </div>
 
-        <div class="form-group">
+
+
+
+
+        <div class="mb-3 form-el-div-wraper">
             <label for="status">Status:</label>
             <input
                 type="checkbox"
@@ -48,10 +49,15 @@
                 name="status"
                 {% if house and house.status %}checked{% endif %}
             />
-            Active
+            
         </div>
 
-        <button type="submit" class="btn btn-primary mt-3">Save</button>
+
+        <div class="button-container">
+            <button type="submit" class="btn btn-primary">{{ 'Save' if houses else 'Add' }}</button>
+        <a href="/houses/add" class="btn btn-secondary">Cancel</a>
+
+        
     </form>
 </div>
 {% endblock %}

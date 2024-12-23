@@ -1,14 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ record and 'Edit Record' or 'Add Record' }}</title>
-</head>
-<body>
-    <h1>{{ record and 'Edit Record' or 'Add Record' }}</h1>
+{% extends 'baseform.html' %}
+
+{% block title %}Records{% endblock %}
+
+{% block content %}
+
+
+<div class="container mt-5 form-field-container">
+    <div class="form-page-header">
+        <h4>{{ 'Edit' if  record else 'Add' }} Record</h4>
+    </div>
+  
     <form method="post">
-        <label>School Subscription:
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="ss.id" class="form-label">School Subscription:</label>
+ 
             <select name="school_subscription_id" required>
                 {% for ss in school_subscriptions %}
                     <option value="{{ ss.id }}" {% if record and record.school_subscription_id == ss.id %}selected{% endif %}>
@@ -16,8 +22,12 @@
                     </option>
                 {% endfor %}
             </select>
-        </label><br>
-        <label>Module:
+        </div>
+
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="module_id" class="form-label">Module</label>
+ 
             <select name="module_id" required>
                 {% for module in modules %}
                     <option value="{{ module.id }}" {% if record and record.module_id == module.id %}selected{% endif %}>
@@ -25,8 +35,12 @@
                     </option>
                 {% endfor %}
             </select>
-        </label><br>
-        <label>Role:
+        </div>
+
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="role_id" class="form-label">Role</label>
+ 
             <select name="role_id" required>
                 {% for role in roles %}
                     <option value="{{ role.id }}" {% if record and record.role_id == role.id %}selected{% endif %}>
@@ -34,8 +48,12 @@
                     </option>
                 {% endfor %}
             </select>
-        </label><br>
-        <label>Permission:
+        </div>
+ 
+
+        <div class="mb-3 form-el-div-wraper">
+            <label for="permission_id" class="form-label">Permission</label>
+ 
             <select name="permission_id" required>
                 {% for permission in permissions %}
                     <option value="{{ permission.id }}" {% if record and record.permission_id == permission.id %}selected{% endif %}>
@@ -43,8 +61,14 @@
                     </option>
                 {% endfor %}
             </select>
-        </label><br>
-        <button type="submit">Save</button>
+        </div>
+        
+        
+        <div class="button-container">
+            <button type="submit" class="btn btn-primary">{{ 'Save' if ssmrp else 'Add' }}</button>
+        <a href="/ssmrp/list" class="btn btn-secondary">Cancel</a>
+         </div>
+           
+        
     </form>
-</body>
-</html>
+    {% endblock %}

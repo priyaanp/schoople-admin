@@ -3,7 +3,7 @@
 
 <div class="container mt-5 form-field-container">
     <div class="form-page-header">
-        <h4>{{ 'Edit' if offers else 'Add' }} Offers</h4>
+        <h4>{{ 'Edit' if offer else 'Add' }} Offers</h4>
     </div>
 
     <form method="post">
@@ -58,23 +58,23 @@
 
 
         <div class="mb-3 form-el-div-wraper">
-        <label for="is_school_specific" class="form-label">Is School Specific</label>
+            <label for="is_school_specific" class="form-label">Is School Specific</label>
             <input type="checkbox" name="is_school_specific" {% if offer and offer.is_school_secific %}checked{% endif %}>
         
         </div>
 
         <div class="mb-3 form-el-div-wraper">
             <label for="status" class="form-label">Status</label>
-                <input type="checkbox" name="status" {% if offer and offer.status %}checked{% endif %}>
+            <input type="checkbox" name="status" {% if offer and offer.status %}checked{% endif %}>
             
-            </div>
+        </div>
         
 
         
 
         <div class="button-container">
-            <button type="submit" class="btn btn-primary">{{ 'Save' if staff else 'Add' }}</button>
-        <a href="/permissions/list" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">{{ 'Save' if offer else 'Add' }}</button>
+        <a href="/offers/list" class="btn btn-secondary">Cancel</a>
          </div>
     
     

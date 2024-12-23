@@ -3,10 +3,19 @@
 {% block title %}Schools Grades Sections List{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>Schools Grades Sections List</h2>
-    <a href="/schools-grades-sections/add" class="btn btn-primary mb-3">Add New</a>
-    <table id="schoolsGradesSectionsTable" class="table table-striped">
+
+<div class="data-table-wraper">
+    <div class="data-table-header">
+        <div class="data-table-header-text">
+            <h4>Schools Grades Sections List</h4>
+        </div>
+        <div class="data-table-header-add-new">
+            <button style="font-size:18px"><a href="/schools-grades-sections/add">Add <i class="fa fa-plus-circle"></i></a></button>
+        </div>
+        
+    </div>
+
+    <table id="schoolsGradesSectionsTable" class="display">
         <thead>
             <tr>
                 <th>#</th>
