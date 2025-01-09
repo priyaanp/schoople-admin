@@ -1,33 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Users Table</title>
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <style>
-        .btn {
-            padding: 5px 10px;
-            margin: 2px;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .btn-edit {
-            background-color: #007bff;
-        }
-        .btn-delete {
-            background-color: #dc3545;
-        }
-    </style>
-</head>
+{% extends 'base.html' %}
+{% block content %}
+   
+
+<div class="data-table-wraper">
+    <div class="data-table-header">
+        <div class="data-table-header-text">
+            <h4>Users list</h4>
+        </div>
+        <div class="data-table-header-add-new">
+            <button style="font-size:18px"><a href="/users/add">Add  <i class="fa fa-plus-circle"></i></a></button>
+        </div>
+        
+    </div>
+
+
+
 <body>
-    <h1>Users Table</h1>
-    <a href="/users/add" class="btn btn-edit">Add User</a>
-    <table id="usersTable" class="display">
+    
+        <table id="usersTable" class="display">
         <thead>
             <tr>
                 <th>#</th>
@@ -84,5 +74,4 @@
             };
         });
     </script>
-</body>
-</html>
+{% endblock %}
