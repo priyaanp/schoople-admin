@@ -3,7 +3,7 @@ from flask import session as flask_session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text 
-from models import Club, Grade, House, SchoolStudent, SchoolsGradesSections, Section, StaffsGrades, Student, Subject, Transport, db, Offer,Subscription,Role,User,UserRole,Permission,School,AcademicYear,SchoolSubscription,Module,SchoolSubscriptionModuleRolePermission,StaffType,Staff
+from models import Club, Grade, House, SchoolStudent, SchoolsGradesSections, Section, StaffsGrades, Student, Subject, Transport, db, Offer,Subscription,Role,User,UserRole,Permission,School,AcademicYear,SchoolSubscription,Module,SchoolSubscriptionModuleRolePermission,StaffType,Staff,ExamMarks,ExamMarkDetails
 from werkzeug.security import check_password_hash
 from config import DevelopmentConfig, TestingConfig, ProductionConfig
 
@@ -1687,6 +1687,7 @@ def get_students():
     school_id = session.get('school_id')  # Ensure school_id is fetched from the session
     grade_id = request.args.get('grade_id')
     section_id = request.args.get('section_id')
+    academic_year_id = request.args.get('academic_year_id')
 
     # Query students based on filters
     query = db.session.query(
@@ -1723,6 +1724,9 @@ def get_students():
     # Apply section filter
     if section_id:
         query = query.filter(SchoolsGradesSections.section_id == section_id)
+
+    if academic_year_id:
+       query = query.filter(SchoolsGradesSections.academic_year_id == academic_year_id)     
 
     students = query.all()
 
@@ -1955,11 +1959,15 @@ def list_students():
     sections = Section.query.join(
         SchoolsGradesSections, Section.id == SchoolsGradesSections.section_id
     ).filter(SchoolsGradesSections.school_id == school_id).all()
+    academic_years = AcademicYear.query.all()
+    active_academic_year = AcademicYear.query.filter_by(active=True).first()
 
     return render_template(
         'students_list.html',
         grades=grades,
-        sections=sections
+        sections=sections,
+        academic_years=academic_years,
+        active_academic_year_id=active_academic_year.id if active_academic_year else None
     )
 
 
@@ -2630,6 +2638,132 @@ def api_subjects_list():
         for subject in subjects
     ]
     return jsonify({"data": data})
+
+@app.route('/exam-marks', methods=['GET'])
+def exam_marks():
+    school_id = session.get('school_id')
+    academic_years = AcademicYear.query.all()
+    grades = Grade.query.join(SchoolsGradesSections, Grade.id == SchoolsGradesSections.grade_id).filter(
+        SchoolsGradesSections.school_id == school_id).all()
+    sections = Section.query.join(SchoolsGradesSections, Section.id == SchoolsGradesSections.section_id).filter(
+        SchoolsGradesSections.school_id == school_id).all()
+    subjects = Subject.query.filter_by(school_id=school_id).all()
+
+    return render_template('exam_marks.html', academic_years=academic_years, grades=grades, sections=sections,
+                           subjects=subjects, terms=['First', 'Second', 'Third'])
+
+
+@app.route('/exam-marks/students', methods=['POST'])
+def get_students_marks():
+    school_id = session.get('school_id')
+    grade_id = request.form.get('grade_id')
+    section_id = request.form.get('section_id')
+    academic_year_id = request.form.get('academic_year_id')
+    term = request.form.get('term')
+    subject_id = request.form.get('subject_id')
+
+    # Fetch the appropriate SchoolsGradesSections entry
+    schools_grades_section = SchoolsGradesSections.query.filter_by(
+        school_id=school_id,
+        grade_id=grade_id,
+        section_id=section_id,
+        academic_year_id=academic_year_id
+    ).first()
+
+    if not schools_grades_section:
+        return jsonify([])
+
+    # Query to fetch students and marks
+    query = db.session.query(
+        Student.id.label("id"),
+        Student.first_name.label("first_name"),
+        Student.last_name.label("last_name"),
+        ExamMarkDetails.marks_obtained.label("marks_obtained"),
+        ExamMarkDetails.marks_out_of.label("marks_out_of"),
+        ExamMarkDetails.weightage.label("weightage"),
+    ).join(
+        SchoolStudent, SchoolStudent.student_id == Student.id
+    ).join(
+        SchoolsGradesSections, SchoolsGradesSections.id == SchoolStudent.school_grade_section_id
+    ).outerjoin(
+        ExamMarks, (ExamMarks.student_id == Student.id) &
+                   (ExamMarks.subject_id == subject_id) &
+                   (ExamMarks.term == term)
+    ).outerjoin(
+        ExamMarkDetails, ExamMarkDetails.exam_mark_id == ExamMarks.id
+    ).filter(
+        SchoolsGradesSections.id == schools_grades_section.id
+    )
+
+    # Fetch the students
+    students = query.all()
+    marks_out_of = None
+    weightage = None
+    for student in students:
+        if student.marks_out_of is not None:
+            marks_out_of = student.marks_out_of
+        if student.weightage is not None:
+            weightage = student.weightage
+        if marks_out_of and weightage:
+            break
+    # Prepare the response data
+    students_data = []
+    for student in students:
+        students_data.append({
+            "id": student.id,
+            "name": f"{student.first_name} {student.last_name}",
+            "marks_obtained": student.marks_obtained if student.marks_obtained is not None else "",
+            "marks_out_of": student.marks_out_of if student.marks_out_of is not None else "",
+            "weightage": student.weightage if student.weightage is not None else "",
+        })
+
+    return jsonify({
+        "students": students_data,
+        "marks_out_of": marks_out_of if marks_out_of is not None else "",
+        "weightage": weightage if weightage is not None else ""
+    })
+
+
+
+@app.route('/exam-marks/save', methods=['POST'])
+def save_exam_marks():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    term = data.get('term')
+    subject_id = data.get('subject_id')
+    marks_out_of = data.get('marks_out_of')
+    weightage = data.get('weightage')
+    students = data.get('students', [])
+
+    for student in students:
+        student_id = student.get('id')
+        marks_obtained = student.get('marks_obtained')
+
+        exam_mark = ExamMarks.query.filter_by(term=term, student_id=student_id, subject_id=subject_id).first()
+        if not exam_mark:
+            exam_mark = ExamMarks(term=term, student_id=student_id, subject_id=subject_id, staff_id=session['user_id'])
+            db.session.add(exam_mark)
+            db.session.commit()
+
+        exam_mark_detail = ExamMarkDetails.query.filter_by(
+            exam_mark_id=exam_mark.id
+        ).first()
+
+        if exam_mark_detail:
+            exam_mark_detail.marks_out_of = marks_out_of
+            exam_mark_detail.weightage = weightage
+            exam_mark_detail.marks_obtained = marks_obtained
+        else:
+            exam_mark_detail = ExamMarkDetails(
+                exam_mark_id=exam_mark.id, marks_out_of=marks_out_of, weightage=weightage, marks_obtained=marks_obtained
+            )
+            db.session.add(exam_mark_detail)
+
+    db.session.commit()
+    return jsonify({"message": "Marks saved successfully"}), 200
+
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -380,6 +380,23 @@ class StaffsGrades(db.Model):
         backref='staffs_grades',
         foreign_keys=[schools_grades_sections_id]  # Specify the foreign key explicitly
     )
+class ExamMarks(db.Model):
+    __tablename__ = 'exam_marks'
+    id = db.Column(db.Integer, primary_key=True)
+    term = db.Column(db.String(50), nullable=False)
+    student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
+    subject_id = db.Column(db.Integer, db.ForeignKey('subjects.id'), nullable=False)
+    staff_id = db.Column(db.Integer, db.ForeignKey('staffs.id'), nullable=False)
+
+class ExamMarkDetails(db.Model):
+    __tablename__ = 'exam_mark_details'
+    id = db.Column(db.Integer, primary_key=True)
+    exam_mark_id = db.Column(db.Integer, db.ForeignKey('exam_marks.id'), nullable=False)
+    evaluation_type = db.Column(db.String(50), nullable=False)
+    weightage = db.Column(db.Float, nullable=False)
+    marks_obtained = db.Column(db.Float, nullable=False)
+    marks_out_of = db.Column(db.Float, nullable=False)
+
     def __repr__(self):
         return f"<StaffsGrades id={self.id}, staff_id={self.staff_id}, schools_grades_sections_id={self.schools_grades_sections_id}>"
     

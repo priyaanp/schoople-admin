@@ -37,7 +37,7 @@
         <select id="academic_year-filter" class="form-control">
             <option value=""> - All - </option> 
             {% for academic_year in academic_years %}
-            <option value="{{ academic_year.id }}">{{ academic_year.start_date }} - {{ academic_year.end_date }}</option>
+            <option value="{{ academic_year.id }}" {% if active_academic_year_id == academic_year.id %}selected{% endif %}>{{ academic_year.start_date }} - {{ academic_year.end_date }}</option>
             {% endfor %}
         </select>        
     </div>
