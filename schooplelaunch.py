@@ -2579,7 +2579,7 @@ def delete_staffs_grades(id):
 
 
 
-@app.route('/subjects', methods=['GET'])
+@app.route('/subjects/list', methods=['GET'])
 def subjects_list():
     """Render the list page."""
     return render_template('subjects_list.html')

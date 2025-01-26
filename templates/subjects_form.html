@@ -4,14 +4,16 @@
 
 {% block content %}
 
+
+
 <div class="container mt-5 form-field-container">
     <div class="form-page-header">
-        <h4>{{ 'Edit' if subject else 'Add' }} Subject</h4>
+        <h4>{{'Edit' if  subject else 'Add'}} Subject</h4>
     </div>
-    
 
-    <form method="post">
-
+    <form action="{{url_for('subjects_add_edit', id=subject.id if subject else None)}}" method="POST">
+    <fieldset>
+        <legend>Subjects Details</legend>
 
             <div class="form-group">
                 <label for="title">Title:</label>

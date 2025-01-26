@@ -4,3 +4,6 @@ psql -U postgres -d schoopledb < "E:\schoople_admin\db.sql"
 
 pip install flask psycopg2 flask-sqlalchemy
 pip install flask flask-sqlalchemy flask-wtf
+
+win key+R
+services.msc

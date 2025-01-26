@@ -1,29 +1,49 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ user and 'Edit User' or 'Add User' }}</title>
-</head>
-<body>
-    <h1>{{ user and 'Edit User' or 'Add User' }}</h1>
-    <form method="post">
-        <label>Username:
-            <input type="text" name="username" value="{{ user and user.username }}" required>
-        </label><br>
-        <label>Password:
-            <input type="password" name="password" {% if not user %}required{% endif %}>
-        </label><br>
-        <label>Status:
-            <input type="checkbox" name="is_active" {% if user and user.is_active %}checked{% endif %}>
-        </label><br>
-        <label>Roles:</label><br>
-        {% for role in roles %}
-            <input type="checkbox" name="roles" value="{{ role.id }}" 
-            {% if user and role.id in assigned_roles %}checked{% endif %}>
-            {{ role.role_name }}<br>
-        {% endfor %}
-        <button type="submit">Save</button>
+{% extends 'baseform.html' %}
+
+{% block title %}User{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5 form-field-container">
+    <div class="form-page-header">
+        <h4>{{ 'Edit' if  User else 'Add' }} User</h4>
+    </div>
+
+    <form method="POST">
+        <div class="mb-3 form-el-div-wraper">
+            <label>Username:
+                   <input type="text" name="username" value="{{ user and user.username }}" required>
+            </label><br>
+
+        
+        </div>
+
+        <div class="mb-3 form-el-div-wraper">
+            <label>Password:
+                   <input type="password" name="password" {% if not user %}required{% endif %}>
+            </label><br>
+        </div>
+        <div class="mb-3 form-el-div-wraper"> 
+            <label>Status:
+                     <input type="checkbox" name="is_active" {% if user and user.is_active %}checked{% endif %}>
+            </label><br>
+          </div>  
+
+
+        <div class="mb-3 form-el-div-wraper">
+                <label>Roles:</label><br>
+                    {% for role in roles %}
+                        <input type="checkbox" name="roles" value="{{ role.id }}" 
+                        {% if user and role.id in assigned_roles %}checked{% endif %}>
+                        {{ role.role_name }}<br>
+                    {% endfor %}
+        </div> 
+        
+        <div class="button-container">
+            <button type="submit" class="btn btn-primary">{{ 'Save' if User else 'Add' }}</button>
+        <a href="/users/list" class="btn btn-secondary">Cancel</a>
+         </div>
+
+        
     </form>
-</body>
-</html>
+    {% endblock %}
