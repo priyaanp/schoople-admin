@@ -54,7 +54,8 @@
     <table id="attendanceTable" class="table table-bordered">
         <thead>
         <tr>
-            <th>Student Name</th>
+            <th>Roll Number</th>
+            <th>Name</th>
             <th>Morning Attendance</th>
             <th>Afternoon Attendance</th>
         </tr>
@@ -89,6 +90,7 @@
                 data.forEach(student => {
                     table.append(`
                         <tr>
+                            <td>${student.roll_number}</td>
                             <td>${student.name}</td>
                             <td><input type="checkbox" class="attendance-checkbox-morning" data-id="${student.id}" ${student.is_present_morning ? 'checked' : ''}></td>
                             <td><input type="checkbox" class="attendance-checkbox-afternoon" data-id="${student.id}" ${student.is_present_afternoon ? 'checked' : ''}></td>

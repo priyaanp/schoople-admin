@@ -645,7 +645,8 @@ CREATE TABLE public.school_student (
     school_grade_section_id integer,
     academic_year_id integer,
     transport_id integer,
-    status boolean
+    status boolean,
+    roll_number character varying
 );
 
 
@@ -1945,10 +1946,10 @@ SELECT pg_catalog.setval('public.school_fee_id_seq', 1, false);
 -- Data for Name: school_student; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.school_student (id, student_id, house_id, clubs, school_grade_section_id, academic_year_id, transport_id, status) FROM stdin;
-2	4	1	tets	2	1	1	t
-1	3	1	tets	1	1	1	t
-3	5	1	Raman	1	4	1	t
+COPY public.school_student (id, student_id, house_id, clubs, school_grade_section_id, academic_year_id, transport_id, status, roll_number) FROM stdin;
+3	5	1	Raman	1	4	1	t	3
+2	4	1	tets	2	1	1	t	1
+1	3	1	tets	1	1	1	t	1
 \.
 
 
@@ -2131,8 +2132,8 @@ SELECT pg_catalog.setval('public.staffs_id_seq', 5, true);
 
 COPY public.students (id, school_id, student_code, first_name, middle_name, last_name, dob, aadhar_number, photo, date_of_admission, admission_number, identification_mark, interests, hobbies, student_email, religion, caste, permanent_address, communication_address, mother_name, father_name, father_qualification, mother_qualification, father_occupation, mother_occupation, father_mobile, mother_mobile, father_email, mother_email, annual_income, blood_group, mother_tongue, is_single_girl, is_minority, sibling_status, relieving_date, relieving_comment, status) FROM stdin;
 4	1	S456	PRIYANARAYANAN	P	P	2024-12-06	123456	\N	2024-12-04	123	ASD	ASD	ASD	TEST@TEST	ASD	qwe	EC Nilayam	CHENGALTHADAM	AD	ASD	a	s	d	f	09961094941	09947006717	TEST@TEST	TEST@TEST11	12321	A+VE	M	t	t	t	\N	\N	1
-3	1	S123	Sanith	P	E	2024-12-01	123456	\N	2024-12-05	123	ASD	ASD	ASD	TEST@TEST	ASD	qwe	EC NILAYAM, CHENGALTHADAM	PAYANGADI, KANNUR	AD	ASD	a	s	d	f	09947006717	09947006717	TEST@TEST	TEST@TEST11	12321	A+VE	M	t	t	t	\N	\N	1
-5	1	TESTCODE1	Ishani	Sanith	E	2015-05-22	AADHARNO987	accept.txt	2024-12-01	8141	ASD	TEST INT	HOBBY	ishanisanith@gmail.com	\N	test	EC NILAYAM, CHENGALTHADAM	PAYANGADI, KANNUR	PRIYA	SANITH	MSC	MCA	SOFTWARE ENGINEER	SOFTWARE ENGINEER	9947006717	9961094941	sanith.e@gmail.com	priyaa.np@gmail.com	5454	O+VE	Malayalam	t	t	t	\N	\N	1
+5	1	TESTCODE1	Ishani	Sanith	E	2015-05-22	AADHARNO987	C4 MDP TERM2 - 24-25 (2).pdf	2024-12-01	8141	ASD	TEST INT	HOBBY	ishanisanith@gmail.com	\N	test	EC NILAYAM, CHENGALTHADAM	PAYANGADI, KANNUR	PRIYA	SANITH	MSC	MCA	SOFTWARE ENGINEER	SOFTWARE ENGINEER	9947006717	9961094941	sanith.e@gmail.com	priyaa.np@gmail.com	5454	O+VE	Malayalam	t	t	t	\N	\N	1
+3	1	SCODE	Sanith	P	E	2024-12-01	123456	C4 MDP TERM2 - 24-25 (2).pdf	2024-12-05	123	ASD	ASD	ASD	TEST@TEST	\N	qwe	EC NILAYAM, CHENGALTHADAM	PAYANGADI, KANNUR	AD	ASD	a	s	d	f	09947006717	09947006717	TEST@TEST	TEST@TEST11	12321	A+VE	M	t	t	t	\N	\N	1
 \.
 
 
@@ -2291,8 +2292,10 @@ SELECT pg_catalog.setval('public.user_roles_id_seq', 74, true);
 --
 
 COPY public.users (id, staff_id, student_id, username, password, is_active) FROM stdin;
-13	\N	5	ishanisanith	scrypt:32768:8:1$BH14Z8SIS6YRSSDm$3db7277df27899973e5a02ae47dcae76eb645875eb9698ba1f9e017341730662039e31bdf388d4b0afc62476e6a989aa8a4b970016c144c5738851897309bc0b	t
 7	4	\N	jacob	scrypt:32768:8:1$qrrYO6x1vlCu1mJO$ff52cce6b32783a500a3117679b227dafbc482e4cfad9e07c148339b99762f32a50ea999bc77f39574538ebf92cc230410f941f425fea5427fcdf06c8a65239c	t
+14	\N	\N	sanith	scrypt:32768:8:1$spt7RPQwLDeJMW51$785beadaac077c27c131cc95d3d1a0039795c390b9a0ec46e43fc65be04f4e86f076e0d11677a2f9756351b8ca2601cca1aefa80f23d7552800c4e6b6546c834	f
+13	\N	5	ishanisanith	scrypt:32768:8:1$g428AASZzEy76hKo$ad263d3b2fae67cd8df08678dd5a53a7355614592cafa5a3052f1db0cf11b288096b8f3d8f710c38df90a04019d41dae3d456096afb66c8ae9fe60421347ebe1	t
+15	\N	\N	ishanisanith	scrypt:32768:8:1$KVXMzoIttMxJ3dHk$3ca3dea914065b4e1a3c07777c217c67dc45a00d44e07dfed8558675b7c3ecb615adfaa1632a2515c4e9f326e742349f66b49b054874500c3404d2b6f847d9f6	f
 6	3	\N	ammu	scrypt:32768:8:1$ziJKns4TbyzNndJ6$05bb28d8d86162bd3904244251403f324233576e8dd82f82e4cee1b49858f212f88c301486e1b7cdc5e22f7ab2e559dd0deb334d3a62f75b6b9e721ef96a1d46	t
 1	\N	\N	sanith	scrypt:32768:8:1$2XBMGTJ4kRlZjRpN$9be2ac1202d62f304ad1dfaabb1fda0b6e2c4900afbd3e00d259a3a77b3b1328fd649bbe76d311cb59f8c0ad2820ce71b56cc850938cbe7b8ac7aac4d831dde5	t
 2	\N	\N	Priya	scrypt:32768:8:1$0edyXONXDCkT3yDO$fb3600bf8881165fed7ac1314f74a4a6a7719a6fd95f365ba0f86922790f337702a31681a40bab5a8cbeb61d780794b35af53279330da9dfec2e9c9c41a0bbf7	t
@@ -2308,7 +2311,7 @@ COPY public.users (id, staff_id, student_id, username, password, is_active) FROM
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 13, true);
+SELECT pg_catalog.setval('public.users_id_seq', 15, true);
 
 
 --

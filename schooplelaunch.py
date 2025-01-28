@@ -1665,23 +1665,7 @@ def delete_club(id):
     db.session.commit()
     return redirect(url_for('list_clubs'))
 
-@app.route('/api/students1', methods=['GET'])
-def get_students1():
-    """API to fetch staff data for DataTable."""
-    students = Student.query.filter_by(school_id=session.get('school_id')).all()
 
-    data = [
-        {
-            "id": student.id,
-            "student_code": student.student_code,            
-            "first_name": student.first_name,
-            "last_name": student.last_name,
-            "dob":student.dob,
-            "status": student.status,
-        }
-        for student in students
-    ]
-    return jsonify({"data": data})
 @app.route('/api/students', methods=['GET'])
 def get_students():
     """Fetch students based on grade and section filters."""
@@ -1692,8 +1676,9 @@ def get_students():
 
     # Query students based on filters
     query = db.session.query(
+        SchoolStudent.roll_number.label("roll_number"),
         Student.id.label("id"),
-        Student.student_code.label("student_code"),     
+        Student.student_code.label("student_code"),
         Student.first_name.label("first_name"),
         Student.last_name.label("last_name"),
         Student.dob.label("dob"),
@@ -1701,11 +1686,11 @@ def get_students():
         Section.title.label("section"),
         School.title.label("school"),
         db.case(
-        (Student.status == 1, "Passed"),
-        else_="Failed"
-    ).label("status")
+            (Student.status == 1, "Passed"),
+            else_="Failed"
+        ).label("status")
     ).join(
-        SchoolStudent, SchoolStudent.student_id == Student.id
+        Student, SchoolStudent.student_id == Student.id
     ).join(
         SchoolsGradesSections, SchoolsGradesSections.id == SchoolStudent.school_grade_section_id
     ).join(
@@ -1729,13 +1714,14 @@ def get_students():
     if academic_year_id:
        query = query.filter(SchoolsGradesSections.academic_year_id == academic_year_id)     
 
-    students = query.all()
+    order_column_name = 'roll_number'
+    students = query.order_by(getattr(SchoolStudent, order_column_name).asc()).all()
 
     # Format data for DataTables
     data = [
         {
-           
-            "id": student.id,
+           "id": student.id,
+            "roll_number": student.roll_number,
             "student_code":student.student_code,
             "name": f"{student.first_name} {student.last_name}",
             "grade": student.grade,
@@ -1819,6 +1805,7 @@ def add_student():
             student_id=new_student.id,
             house_id=request.form['house_id'] or None,
             clubs=request.form['clubs'],
+            roll_number=request.form['roll_number'],
             school_grade_section_id=request.form['school_grade_section_id'],
             academic_year_id=request.form['academic_year_id'],
             transport_id=request.form['transport_id'] or None,
@@ -1913,6 +1900,7 @@ def edit_student(id):
         if school_student:
             school_student.house_id = request.form['house_id'] or None
             school_student.clubs = request.form['clubs']
+            school_student.roll_number = request.form['roll_number']
             school_student.school_grade_section_id = request.form['school_grade_section_id']
             school_student.academic_year_id = request.form['academic_year_id']
             school_student.transport_id = request.form['transport_id'] or None
@@ -1923,6 +1911,7 @@ def edit_student(id):
                 student_id=id,
                 house_id=request.form['house_id'] or None,
                 clubs=request.form['clubs'],
+                roll_number = request.form['roll_number'],
                 school_grade_section_id=request.form['school_grade_section_id'],
                 academic_year_id=request.form['academic_year_id'],
                 transport_id=request.form['transport_id'] or None,
@@ -2644,6 +2633,7 @@ def api_subjects_list():
 def exam_marks():
     school_id = session.get('school_id')
     academic_years = AcademicYear.query.all()
+    active_academic_year = AcademicYear.query.filter_by(active=True).first()
     grades = Grade.query.join(SchoolsGradesSections, Grade.id == SchoolsGradesSections.grade_id).filter(
         SchoolsGradesSections.school_id == school_id).all()
     sections = Section.query.join(SchoolsGradesSections, Section.id == SchoolsGradesSections.section_id).filter(
@@ -2651,7 +2641,7 @@ def exam_marks():
     subjects = Subject.query.filter_by(school_id=school_id).all()
 
     return render_template('exam_marks.html', academic_years=academic_years, grades=grades, sections=sections,
-                           subjects=subjects, terms=['First', 'Second', 'Third'])
+                           subjects=subjects,active_academic_year=active_academic_year, terms=['First', 'Second', 'Third'])
 
 
 @app.route('/exam-marks/students', methods=['POST'])
@@ -2798,6 +2788,7 @@ def get_students_attendance():
     academic_year_id = request.form.get('academic_year_id')
 
     query = db.session.query(
+        SchoolStudent.roll_number.label("roll_number"),
         Student.id.label("id"),
         Student.first_name.label("first_name"),
         Student.last_name.label("last_name"),
@@ -2829,11 +2820,12 @@ def get_students_attendance():
         query = query.filter(SchoolsGradesSections.section_id == section_id)
     if academic_year_id:
         query = query.filter(SchoolsGradesSections.academic_year_id == academic_year_id)
-    students = query.all()
+    students = query.order_by(getattr(SchoolStudent, 'roll_number').asc()).all()
 
     data = [
         {
             "id": student.id,
+            "roll_number": student.roll_number,
             "name": f"{student.first_name} {student.last_name}",
             "is_present_morning": student.is_present_morning,
             "is_present_afternoon": student.is_present_afternoon

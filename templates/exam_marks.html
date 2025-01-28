@@ -9,7 +9,9 @@
             <select id="academic-year" class="form-control">
                 <option value="">Select Year</option>
                 {% for year in academic_years %}
-                <option value="{{ year.id }}">{{ year.start_date }} - {{ year.end_date }}</option>
+                <option value="{{ year.id }}" {% if active_academic_year and year.id == active_academic_year.id %}selected{% endif %}>
+                    {{ year.start_date }} - {{ year.end_date }}
+                </option>
                 {% endfor %}
             </select>
         </div>

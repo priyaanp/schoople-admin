@@ -320,6 +320,7 @@ class SchoolStudent(db.Model):
     academic_year_id = db.Column(db.Integer, db.ForeignKey('academic_years.id'), nullable=False)
     transport_id = db.Column(db.Integer, db.ForeignKey('transports.id'), nullable=True)
     status = db.Column(db.Boolean, nullable=False, default=True)  # Active/Inactive
+    roll_number = db.Column(db.String, nullable=True)
 
     # Relationships
     student = db.relationship('Student', backref='school_student', lazy=True)

@@ -44,7 +44,7 @@
     <table id="studentsTable" class="display">
         <thead>
             <tr>
-                <th>#</th>
+                <th>Roll Number</th>
                 <th>Student Code</th>
                 <th>Name</th>
                 <th>Grade</th>
@@ -78,8 +78,7 @@
             },
             columns: [
                 {
-                    data: 'id',
-                    render: (data, type, row, meta) => meta.row + 1, // Serial number
+                    data: 'roll_number' // Serial number
                 },
                 { data: 'student_code' },
                 { data: 'name' },
