@@ -73,7 +73,8 @@
         <table id="studentsTable" class="table table-bordered">
             <thead>
                 <tr>
-                    <th>Student Name</th>
+                    <th>Roll Number</th>
+                    <th>Name</th>
                     <th>Marks Obtained</th>
                 </tr>
             </thead>
@@ -139,6 +140,7 @@
             dataTable = $('#studentsTable').DataTable({
                 data: response.students,
                 columns: [
+                { data: 'roll_number', title: 'Roll Number' },
                     { data: 'name', title: 'Student Name' },
                     {
                         data: 'marks_obtained',

@@ -2667,6 +2667,7 @@ def get_students_marks():
     # Query to fetch students and marks
     query = db.session.query(
         Student.id.label("id"),
+        SchoolStudent.roll_number.label("roll_number"),
         Student.first_name.label("first_name"),
         Student.last_name.label("last_name"),
         ExamMarkDetails.marks_obtained.label("marks_obtained"),
@@ -2687,7 +2688,7 @@ def get_students_marks():
     )
 
     # Fetch the students
-    students = query.all()
+    students = query.order_by(getattr(SchoolStudent, 'roll_number').asc()).all()
     marks_out_of = None
     weightage = None
     for student in students:
@@ -2701,6 +2702,7 @@ def get_students_marks():
     students_data = []
     for student in students:
         students_data.append({
+            "roll_number": student.roll_number,
             "id": student.id,
             "name": f"{student.first_name} {student.last_name}",
             "marks_obtained": student.marks_obtained if student.marks_obtained is not None else "",
