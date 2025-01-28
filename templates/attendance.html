@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Management</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-4">
+    <h2>Attendance Management</h2>
+
+    <!-- Filters -->
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <label for="academic_year">Academic Year:</label>
+            <select id="academic_year" class="form-control">
+                {% for year in academic_years %}
+                <option value="{{ year.id }}" {% if active_academic_year and year.id == active_academic_year.id %}selected{% endif %}>
+                    {{ year.start_date }} - {{ year.end_date }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>        
+        <div class="col-md-3">
+            <label for="grade">Grade:</label>
+            <select id="grade" class="form-control">
+                <option value="">Select Grade</option>
+                {% for grade in grades %}
+                <option value="{{ grade.id }}">{{ grade.title }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="section">Section:</label>
+            <select id="section" class="form-control">
+                <option value="">Select Section</option>
+                {% for section in sections %}
+                <option value="{{ section.id }}">{{ section.title }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="date">Date:</label>
+            <input type="date" id="date" class="form-control">
+        </div>
+        <div class="col-md-3 align-self-end">
+            <button id="search-btn" class="btn btn-primary">Search</button>
+        </div>
+    </div>
+
+    <!-- Attendance Table -->
+    <table id="attendanceTable" class="table table-bordered">
+        <thead>
+        <tr>
+            <th>Student Name</th>
+            <th>Morning Attendance</th>
+            <th>Afternoon Attendance</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <!-- Save Button -->
+    <button id="save-btn" class="btn btn-success mt-3">Save Attendance</button>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+<script>
+    $(document).ready(function () {
+        const table = $('#attendanceTable tbody');
+
+        // Search Students
+        $('#search-btn').on('click', function () {
+            const academicYearId = $('#academic_year').val();
+            const gradeId = $('#grade').val();
+            const sectionId = $('#section').val();
+            const date = $('#date').val();
+
+            $.post('/attendance/students', {
+                academic_year_id: academicYearId,
+                grade_id: gradeId,
+                section_id: sectionId,
+                attendence_date: date
+            }, function (data) {
+                table.empty();
+                data.forEach(student => {
+                    table.append(`
+                        <tr>
+                            <td>${student.name}</td>
+                            <td><input type="checkbox" class="attendance-checkbox-morning" data-id="${student.id}" ${student.is_present_morning ? 'checked' : ''}></td>
+                            <td><input type="checkbox" class="attendance-checkbox-afternoon" data-id="${student.id}" ${student.is_present_afternoon ? 'checked' : ''}></td>
+                        </tr>
+                    `);
+                });
+            });
+        });
+
+        // Save Attendance
+        $('#save-btn').on('click', function () {
+            const gradeId = $('#grade').val();
+            const sectionId = $('#section').val();
+            const date = $('#date').val();
+
+            const students = [];
+            table.find('tr').each(function () {
+                const row = $(this);
+                const id = row.find('.attendance-checkbox-morning').data('id');
+                const isPresentMorning = row.find('.attendance-checkbox-morning').is(':checked');
+                const isPresentAfternoon = row.find('.attendance-checkbox-afternoon').is(':checked');
+
+                students.push({
+                    id: id,
+                    is_present_morning: isPresentMorning,
+                    is_present_afternoon: isPresentAfternoon
+                });
+            });
+
+            $.ajax({
+                url: '/attendance/save',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    schools_grades_sections_id: gradeId,
+                    attendence_date: date,
+                    students: students
+                }),
+                success: function (response) {
+                    alert(response.message);
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

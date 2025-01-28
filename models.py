@@ -400,4 +400,30 @@ class ExamMarkDetails(db.Model):
     def __repr__(self):
         return f"<StaffsGrades id={self.id}, staff_id={self.staff_id}, schools_grades_sections_id={self.schools_grades_sections_id}>"
     
+class Attendance(db.Model):
+    __tablename__ = 'attendances'
 
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
+    staff_id = db.Column(db.Integer, db.ForeignKey('staffs.id'), nullable=False)
+    schools_grades_sections_id = db.Column(db.Integer, db.ForeignKey('schools_grades_sections.id'), nullable=False)
+    is_hourly = db.Column(db.Boolean, default=False)
+    attendence_date = db.Column(db.Date, nullable=False)
+    period = db.Column(db.String, nullable=True)
+    time_slot = db.Column(db.Integer, nullable=True)
+    is_present_morning = db.Column(db.Boolean, default=False)
+    is_present_afternoon = db.Column(db.Boolean, default=False)
+    created_by = db.Column(db.Integer, db.ForeignKey('staffs.id'), nullable=False)
+    created_on = db.Column(db.Date, nullable=False)
+    updated_by = db.Column(db.Integer, db.ForeignKey('staffs.id'), nullable=True)
+    updated_on = db.Column(db.Date, nullable=True)
+
+    # Relationships
+    student = db.relationship('Student', backref='attendances')
+    staff = db.relationship('Staff', foreign_keys=[staff_id], backref='attendances_created')
+    created_by_staff = db.relationship('Staff', foreign_keys=[created_by], backref='attendances_creator')
+    updated_by_staff = db.relationship('Staff', foreign_keys=[updated_by], backref='attendances_updater')
+    schools_grades_sections = db.relationship('SchoolsGradesSections', backref='attendances')
+
+    def __repr__(self):
+        return f"<Attendance(id={self.id}, student_id={self.student_id}, staff_id={self.staff_id}, attendence_date={self.attendence_date})>"

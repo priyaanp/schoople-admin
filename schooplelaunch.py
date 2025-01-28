@@ -1,9 +1,10 @@
+import datetime
 from flask import Flask, render_template, request, redirect, url_for, jsonify,session
 from flask import session as flask_session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text 
-from models import Club, Grade, House, SchoolStudent, SchoolsGradesSections, Section, StaffsGrades, Student, Subject, Transport, db, Offer,Subscription,Role,User,UserRole,Permission,School,AcademicYear,SchoolSubscription,Module,SchoolSubscriptionModuleRolePermission,StaffType,Staff,ExamMarks,ExamMarkDetails
+from models import Club, Grade, House, SchoolStudent, SchoolsGradesSections, Section, StaffsGrades, Student, Subject, Transport, db, Offer,Subscription,Role,User,UserRole,Permission,School,AcademicYear,SchoolSubscription,Module,SchoolSubscriptionModuleRolePermission,StaffType,Staff,ExamMarks,ExamMarkDetails,Attendance
 from werkzeug.security import check_password_hash
 from config import DevelopmentConfig, TestingConfig, ProductionConfig
 
@@ -2763,7 +2764,132 @@ def save_exam_marks():
 
     db.session.commit()
     return jsonify({"message": "Marks saved successfully"}), 200
+@app.route('/attendance', methods=['GET'])
+def attendance_page():
+    school_id = session.get('school_id')  # Fetch the school ID from session
+
+    # Fetch data for filters
+    academic_years = AcademicYear.query.all()
+    active_academic_year = AcademicYear.query.filter_by(active=True).first()
+
+
+    grades = Grade.query.join(
+        SchoolsGradesSections, Grade.id == SchoolsGradesSections.grade_id
+    ).filter(SchoolsGradesSections.school_id == school_id).all()
+
+    sections = Section.query.join(
+        SchoolsGradesSections, Section.id == SchoolsGradesSections.section_id
+    ).filter(SchoolsGradesSections.school_id == school_id).all()
+
+    return render_template(
+        'attendance.html',
+        academic_years=academic_years,
+        active_academic_year=active_academic_year,
+        grades=grades,
+        sections=sections
+    )
+
+@app.route('/attendance/students', methods=['POST'])
+def get_students_attendance():
+    school_id = session.get('school_id')
+    grade_id = request.form.get('grade_id')
+    section_id = request.form.get('section_id')
+    attendence_date = request.form.get('attendence_date')
+    academic_year_id = request.form.get('academic_year_id')
+
+    query = db.session.query(
+        Student.id.label("id"),
+        Student.first_name.label("first_name"),
+        Student.last_name.label("last_name"),
+        db.case(
+            (Attendance.is_present_morning == True, True),
+            else_=False
+        ).label("is_present_morning"),
+        db.case(
+            (Attendance.is_present_afternoon == True, True),
+            else_=False
+        ).label("is_present_afternoon")
+    ).join(
+        SchoolStudent, SchoolStudent.student_id == Student.id
+    ).join(
+        SchoolsGradesSections, SchoolsGradesSections.id == SchoolStudent.school_grade_section_id
+    ).outerjoin(
+        Attendance, db.and_(
+            Attendance.student_id == Student.id,
+            Attendance.attendence_date == attendence_date,
+            Attendance.schools_grades_sections_id == SchoolsGradesSections.id
+        )
+    ).filter(
+        SchoolsGradesSections.school_id == school_id
+    )
+
+    if grade_id:
+        query = query.filter(SchoolsGradesSections.grade_id == grade_id)
+    if section_id:
+        query = query.filter(SchoolsGradesSections.section_id == section_id)
+    if academic_year_id:
+        query = query.filter(SchoolsGradesSections.academic_year_id == academic_year_id)
+    students = query.all()
+
+    data = [
+        {
+            "id": student.id,
+            "name": f"{student.first_name} {student.last_name}",
+            "is_present_morning": student.is_present_morning,
+            "is_present_afternoon": student.is_present_afternoon
+        }
+        for student in students
+    ]
+
+    return jsonify(data)
+
+
+
+@app.route('/attendance/save', methods=['POST'])
+def save_attendance():
+    data = request.get_json()
+    staff_id = session.get('user_id')
+    schools_grades_sections_id = data.get('schools_grades_sections_id')
+    attendence_date = data.get('attendence_date')
+    students = data.get('students', [])
+
+    for student in students:
+        student_id = student['id']
+        is_present_morning = student.get('is_present_morning', False)
+        is_present_afternoon = student.get('is_present_afternoon', False)
+
+        # Check if attendance already exists
+        attendance = Attendance.query.filter_by(
+            student_id=student_id,
+            schools_grades_sections_id=schools_grades_sections_id,
+            attendence_date=attendence_date
+        ).first()
+
+        if attendance:
+            attendance.is_present_morning = is_present_morning
+            attendance.is_present_afternoon = is_present_afternoon
+            attendance.updated_by = staff_id
+            attendance.updated_on = datetime.datetime.now()
+        else:
+            attendance = Attendance(
+                student_id=student_id,
+                staff_id=staff_id,
+                schools_grades_sections_id=schools_grades_sections_id,
+                attendence_date=attendence_date,
+                is_present_morning=is_present_morning,
+                is_present_afternoon=is_present_afternoon,
+                created_by=staff_id,
+                created_on=datetime.datetime.now()
+            )
+            db.session.add(attendance)
+
+    db.session.commit()
+    return jsonify({"message": "Attendance saved successfully"})
+
+
 
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+

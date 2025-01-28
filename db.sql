@@ -70,10 +70,10 @@ ALTER SEQUENCE public.academic_years_id_seq OWNED BY public.academic_years.id;
 
 
 --
--- Name: attendences; Type: TABLE; Schema: public; Owner: postgres
+-- Name: attendances; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.attendences (
+CREATE TABLE public.attendances (
     id integer NOT NULL,
     student_id integer,
     staff_id integer,
@@ -82,20 +82,22 @@ CREATE TABLE public.attendences (
     attendence_date date,
     period character varying,
     time_slot integer,
+    is_present_morning boolean,
+    is_present_afternoon boolean,
     created_by integer,
-    created_on date,
+    created_on timestamp without time zone,
     updated_by integer,
-    updated_on date
+    updated_on timestamp without time zone
 );
 
 
-ALTER TABLE public.attendences OWNER TO postgres;
+ALTER TABLE public.attendances OWNER TO postgres;
 
 --
--- Name: attendences_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: attendances_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE public.attendences_id_seq
+CREATE SEQUENCE public.attendances_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -103,13 +105,13 @@ CREATE SEQUENCE public.attendences_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.attendences_id_seq OWNER TO postgres;
+ALTER TABLE public.attendances_id_seq OWNER TO postgres;
 
 --
--- Name: attendences_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: attendances_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE public.attendences_id_seq OWNED BY public.attendences.id;
+ALTER SEQUENCE public.attendances_id_seq OWNED BY public.attendances.id;
 
 
 --
@@ -1391,10 +1393,10 @@ ALTER TABLE ONLY public.academic_years ALTER COLUMN id SET DEFAULT nextval('publ
 
 
 --
--- Name: attendences id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: attendances id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.attendences ALTER COLUMN id SET DEFAULT nextval('public.attendences_id_seq'::regclass);
+ALTER TABLE ONLY public.attendances ALTER COLUMN id SET DEFAULT nextval('public.attendances_id_seq'::regclass);
 
 
 --
@@ -1633,8 +1635,8 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 --
 
 COPY public.academic_years (id, start_date, end_date, active) FROM stdin;
-1	2024-11-05	2024-11-28	t
-4	2000-04-01	2001-05-30	t
+4	2000-04-01	2001-05-30	f
+1	2024-04-01	2025-03-31	t
 \.
 
 
@@ -1646,18 +1648,22 @@ SELECT pg_catalog.setval('public.academic_years_id_seq', 4, true);
 
 
 --
--- Data for Name: attendences; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: attendances; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.attendences (id, student_id, staff_id, schools_grades_sections_id, is_hourly, attendence_date, period, time_slot, created_by, created_on, updated_by, updated_on) FROM stdin;
+COPY public.attendances (id, student_id, staff_id, schools_grades_sections_id, is_hourly, attendence_date, period, time_slot, is_present_morning, is_present_afternoon, created_by, created_on, updated_by, updated_on) FROM stdin;
+9	3	1	1	f	2025-01-28	\N	\N	t	f	1	2025-01-28 20:31:16.099636	\N	\N
+10	5	1	1	f	2025-01-28	\N	\N	t	f	1	2025-01-28 20:31:16.099636	\N	\N
+11	3	1	1	f	2025-01-27	\N	\N	t	t	1	2025-01-28 20:32:38.645175	\N	\N
+12	5	1	1	f	2025-01-27	\N	\N	t	t	1	2025-01-28 20:32:38.658247	\N	\N
 \.
 
 
 --
--- Name: attendences_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: attendances_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.attendences_id_seq', 1, false);
+SELECT pg_catalog.setval('public.attendances_id_seq', 12, true);
 
 
 --
@@ -1674,8 +1680,6 @@ COPY public.clubs (id, school_id, title, description, status) FROM stdin;
 12	1	9	            0 	f
 13	1	10	 10            	f
 14	1	11	  11           	f
-5	1	test	            as              	t
-6	1	333	                         3 	t
 \.
 
 
@@ -1706,6 +1710,15 @@ SELECT pg_catalog.setval('public.events_id_seq', 1, false);
 --
 
 COPY public.exam_mark_details (id, exam_mark_id, evaluation_type, weightage, marks_obtained, marks_out_of) FROM stdin;
+15	13	\N	20	99	100
+13	11	\N	20	290	300
+14	12	\N	20	180	300
+12	10	\N	10	80	100
+11	9	\N	10	80.5	100
+17	15	\N	20	98	100
+16	14	\N	20	77	100
+18	16	\N	1	24	25
+19	17	\N	1	20	25
 \.
 
 
@@ -1713,7 +1726,7 @@ COPY public.exam_mark_details (id, exam_mark_id, evaluation_type, weightage, mar
 -- Name: exam_mark_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.exam_mark_details_id_seq', 1, false);
+SELECT pg_catalog.setval('public.exam_mark_details_id_seq', 19, true);
 
 
 --
@@ -1721,6 +1734,15 @@ SELECT pg_catalog.setval('public.exam_mark_details_id_seq', 1, false);
 --
 
 COPY public.exam_marks (id, term, student_id, subject_id, staff_id) FROM stdin;
+9	First	3	1	1
+10	First	5	1	1
+11	Second	3	1	1
+12	Second	5	1	1
+13	Third	4	1	1
+14	First	3	2	1
+15	First	5	2	1
+16	Second	5	2	1
+17	Second	3	2	1
 \.
 
 
@@ -1728,7 +1750,7 @@ COPY public.exam_marks (id, term, student_id, subject_id, staff_id) FROM stdin;
 -- Name: exam_marks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.exam_marks_id_seq', 1, false);
+SELECT pg_catalog.setval('public.exam_marks_id_seq', 17, true);
 
 
 --
@@ -1817,14 +1839,27 @@ SELECT pg_catalog.setval('public.houses_id_seq', 2, true);
 --
 
 COPY public.modules (id, module_name, menu_name, parent_id, is_active, is_visible_in_app, module_link, priority) FROM stdin;
-1	Staffs	Staffs	\N	t	t	staffs/list	3
-2	Users	Users	\N	t	t	users/list	2
-4	Clubs	Clubs	\N	t	t	clubs/list	40
-6	Offers	Offers	\N	t	f	offers/list	6
 7	Schools	Schools	\N	t	f	schools/list	1
-5	Students	Students	\N	t	t	students/list	4
-3	Subscriptions	Subscriptions	\N	t	t	subscriptions/list	1
-11	Staff Assignment	Staff Assignment	\N	t	f	staff_assignment/list	7
+20	School Subscriptions	School Subscriptions	\N	t	f	school_subscriptions/list	3
+3	Subscriptions	Subscriptions	\N	t	t	subscriptions/list	2
+18	Modules	Modules	\N	t	f	modules/list	5
+19	Module Config	Module Config	\N	t	f	ssmrp/list	6
+23	Roles	Roles	\N	t	f	roles/list	7
+2	Users	Users	\N	t	f	users/list	8
+24	Permissions	Permissions	\N	t	f	permissions/list	9
+5	Students	Students	\N	t	t	students/list	10
+6	Offers	Offers	\N	t	f	offers/list	4
+1	Staffs	Staffs	\N	t	t	staffs/list	12
+11	Staff Assignment	Staff Assignment	\N	t	f	staff_assignment/list	13
+22	Staff Types	Staff Types	\N	t	f	staff_types/list	11
+12	Exams	Exams	\N	t	f	exam-marks	16
+13	Attendances	Attendances	\N	t	f	attendance	14
+14	Subjects	Subjects	\N	t	f	subjects/list	15
+15	Transports	Transports	\N	t	f	transports/list	17
+16	Grades	Grades	\N	t	f	grades/list	18
+17	Sections	Sections	\N	t	f	sections/list	19
+21	Houses	Houses	\N	t	f	houses/list	20
+4	Clubs	Clubs	\N	t	t	clubs/list	21
 \.
 
 
@@ -1832,7 +1867,7 @@ COPY public.modules (id, module_name, menu_name, parent_id, is_active, is_visibl
 -- Name: modules_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.modules_id_seq', 11, true);
+SELECT pg_catalog.setval('public.modules_id_seq', 24, true);
 
 
 --
@@ -1956,6 +1991,22 @@ COPY public.school_subscription_module_role_permission (id, school_subscription_
 9	4	11	3	2
 10	2	1	2	2
 2	4	3	3	1
+11	4	12	3	2
+12	4	12	1	2
+13	4	13	3	2
+14	4	14	3	2
+15	4	15	3	2
+16	4	16	3	2
+17	4	17	3	2
+18	4	18	3	2
+19	4	19	3	2
+20	4	20	3	2
+21	4	21	3	2
+22	4	22	3	2
+23	4	2	3	2
+24	4	23	3	2
+25	4	24	3	2
+26	4	7	3	2
 \.
 
 
@@ -1963,7 +2014,7 @@ COPY public.school_subscription_module_role_permission (id, school_subscription_
 -- Name: school_subscription_module_role_permission_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.school_subscription_module_role_permission_id_seq', 10, true);
+SELECT pg_catalog.setval('public.school_subscription_module_role_permission_id_seq', 26, true);
 
 
 --
@@ -2113,6 +2164,7 @@ SELECT pg_catalog.setval('public.students_id_seq', 5, true);
 
 COPY public.subjects (id, school_id, title) FROM stdin;
 1	1	English
+2	1	Maths
 \.
 
 
@@ -2120,7 +2172,7 @@ COPY public.subjects (id, school_id, title) FROM stdin;
 -- Name: subjects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.subjects_id_seq', 1, true);
+SELECT pg_catalog.setval('public.subjects_id_seq', 2, true);
 
 
 --
@@ -2268,11 +2320,11 @@ ALTER TABLE ONLY public.academic_years
 
 
 --
--- Name: attendences attendences_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: attendances attendances_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.attendences
-    ADD CONSTRAINT attendences_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.attendances
+    ADD CONSTRAINT attendances_pkey PRIMARY KEY (id);
 
 
 --
@@ -2540,43 +2592,43 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: attendences attendences_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: attendances attendances_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.attendences
-    ADD CONSTRAINT attendences_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.staffs(id);
-
-
---
--- Name: attendences attendences_schools_grades_sections_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.attendences
-    ADD CONSTRAINT attendences_schools_grades_sections_id_fkey FOREIGN KEY (schools_grades_sections_id) REFERENCES public.schools_grades_sections(id);
+ALTER TABLE ONLY public.attendances
+    ADD CONSTRAINT attendances_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.staffs(id);
 
 
 --
--- Name: attendences attendences_staff_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: attendances attendances_schools_grades_sections_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.attendences
-    ADD CONSTRAINT attendences_staff_id_fkey FOREIGN KEY (staff_id) REFERENCES public.staffs(id);
-
-
---
--- Name: attendences attendences_student_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.attendences
-    ADD CONSTRAINT attendences_student_id_fkey FOREIGN KEY (student_id) REFERENCES public.students(id);
+ALTER TABLE ONLY public.attendances
+    ADD CONSTRAINT attendances_schools_grades_sections_id_fkey FOREIGN KEY (schools_grades_sections_id) REFERENCES public.schools_grades_sections(id);
 
 
 --
--- Name: attendences attendences_updated_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: attendances attendances_staff_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.attendences
-    ADD CONSTRAINT attendences_updated_by_fkey FOREIGN KEY (updated_by) REFERENCES public.staffs(id);
+ALTER TABLE ONLY public.attendances
+    ADD CONSTRAINT attendances_staff_id_fkey FOREIGN KEY (staff_id) REFERENCES public.staffs(id);
+
+
+--
+-- Name: attendances attendances_student_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.attendances
+    ADD CONSTRAINT attendances_student_id_fkey FOREIGN KEY (student_id) REFERENCES public.students(id);
+
+
+--
+-- Name: attendances attendances_updated_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.attendances
+    ADD CONSTRAINT attendances_updated_by_fkey FOREIGN KEY (updated_by) REFERENCES public.staffs(id);
 
 
 --
