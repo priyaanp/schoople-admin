@@ -428,3 +428,44 @@ class Attendance(db.Model):
 
     def __repr__(self):
         return f"<Attendance(id={self.id}, student_id={self.student_id}, staff_id={self.staff_id}, attendence_date={self.attendence_date})>"
+
+class TimeTable(db.Model):
+    __tablename__ = 'time_tables'
+
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
+    academic_year_id = db.Column(db.Integer, db.ForeignKey('academic_years.id'), nullable=False)
+    schools_grades_sections_id = db.Column(db.Integer, db.ForeignKey('schools_grades_sections.id'), nullable=False)
+
+    # Relationships
+    academic_year = db.relationship('AcademicYear', backref='time_tables', lazy=True)
+    school = db.relationship('School', backref='time_tables', lazy=True)
+    grade_section = db.relationship('SchoolsGradesSections', backref='time_tables', lazy=True)
+
+    # Single relationship for details
+    time_table_details = db.relationship('TimeTableDetails', backref='time_table', cascade='all, delete-orphan')
+
+    def __repr__(self):
+        return f"<TimeTable(id={self.id}, school_id={self.school_id}, academic_year_id={self.academic_year_id})>"
+
+
+class TimeTableDetails(db.Model):
+    __tablename__ = 'time_table_details'
+
+    id = db.Column(db.Integer, primary_key=True)
+    time_table_id = db.Column(db.Integer, db.ForeignKey('time_tables.id'), nullable=False)
+    day_name = db.Column(db.String, nullable=False)
+    order_number = db.Column(db.Integer, nullable=True)
+    time_slot = db.Column(db.String, nullable=False)
+    subject_id = db.Column(db.Integer, db.ForeignKey('subjects.id'), nullable=False)
+    staff_id = db.Column(db.Integer, db.ForeignKey('staffs.id'), nullable=False)
+
+    # Relationships
+    subject = db.relationship('Subject', backref='time_table_details', lazy=True)
+    staff = db.relationship('Staff', backref='time_table_details', lazy=True)
+
+    def __repr__(self):
+        return (f"<TimeTableDetails(id={self.id}, day_name={self.day_name}, "
+                f"time_slot={self.time_slot}, subject_id={self.subject_id}, staff_id={self.staff_id})>")
+
+    

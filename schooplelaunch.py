@@ -4,7 +4,7 @@ from flask import session as flask_session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text 
-from models import Club, Grade, House, SchoolStudent, SchoolsGradesSections, Section, StaffsGrades, Student, Subject, Transport, db, Offer,Subscription,Role,User,UserRole,Permission,School,AcademicYear,SchoolSubscription,Module,SchoolSubscriptionModuleRolePermission,StaffType,Staff,ExamMarks,ExamMarkDetails,Attendance
+from models import Club, Grade, House, SchoolStudent, SchoolsGradesSections, Section, StaffsGrades, Student, Subject, TimeTable, TimeTableDetails, Transport, db, Offer,Subscription,Role,User,UserRole,Permission,School,AcademicYear,SchoolSubscription,Module,SchoolSubscriptionModuleRolePermission,StaffType,Staff,ExamMarks,ExamMarkDetails,Attendance
 from werkzeug.security import check_password_hash
 from config import DevelopmentConfig, TestingConfig, ProductionConfig
 
@@ -2880,7 +2880,145 @@ def save_attendance():
     db.session.commit()
     return jsonify({"message": "Attendance saved successfully"})
 
+@app.route('/timetable-manage', methods=['GET'])
+def timetable_manage():
+    school_id = session.get('school_id')
 
+    # Fetch data for the select boxes
+    academic_years = AcademicYear.query.all()
+    active_academic_year = AcademicYear.query.filter_by(active=True).first()
+    grades = Grade.query.join(SchoolsGradesSections, Grade.id == SchoolsGradesSections.grade_id).filter(
+        SchoolsGradesSections.school_id == school_id).all()
+    sections = Section.query.join(SchoolsGradesSections, Section.id == SchoolsGradesSections.section_id).filter(
+        SchoolsGradesSections.school_id == school_id).all()
+    subjects = Subject.query.filter_by(school_id=school_id).all()
+    staffs = Staff.query.filter_by(school_id=school_id).all()
+
+    return render_template(
+        'timetable_manage.html',
+        academic_years=academic_years,
+        grades=grades,
+        sections=sections,
+        subjects=subjects,
+        staffs=staffs,
+        active_academic_year=active_academic_year
+    )
+
+
+@app.route('/api/timetable', methods=['GET'])
+def get_timetable():
+    academic_year_id = request.args.get('academic_year_id')
+    grade_id = request.args.get('grade_id')
+    section_id = request.args.get('section_id')
+    school_id = session.get('school_id')
+
+    # Ensure the school-grade-section mapping exists
+    schools_grades_section = SchoolsGradesSections.query.filter_by(
+        school_id=school_id,
+        grade_id=grade_id,
+        section_id=section_id,
+        academic_year_id=academic_year_id
+    ).first()
+
+    if not schools_grades_section:
+        return jsonify({"data": []})
+    print("Received ID:",schools_grades_section.id)
+    timetables = TimeTable.query.filter_by(
+        school_id=school_id,
+        academic_year_id=academic_year_id,
+        schools_grades_sections_id=schools_grades_section.id
+    ).all()
+
+    data = [
+        {
+            "id": detail.id,
+            "day_name": detail.day_name,
+            "time_slot": detail.time_slot,
+            "subject": detail.subject.title if detail.subject else "N/A",
+            "staff": f"{detail.staff.first_name} {detail.staff.last_name}" if detail.staff else "N/A",
+            "order_number": detail.order_number,
+        }
+        for entry in timetables
+        for detail in entry.time_table_details
+    ]
+
+    day_order = {
+        'Monday': 0,
+        'Tuesday': 1,
+        'Wednesday': 2,
+        'Thursday': 3,
+        'Friday': 4,
+        'Saturday': 5,
+        'Sunday': 6,
+    }
+
+    # Sort the data by day_name (using the day_order mapping) and order_number
+    data.sort(key=lambda x: (day_order.get(x['day_name'], 7), x['order_number']))
+    return jsonify({"data": data})
+
+
+
+@app.route('/api/timetable/save', methods=['POST'])
+def save_timetable():
+    school_id = session.get('school_id')
+    academic_year_id = request.form.get('academic_year_id')
+    grade_id = request.form.get('grade_id')
+    section_id = request.form.get('section_id')
+
+    schools_grades_section = SchoolsGradesSections.query.filter_by(
+        school_id=school_id,
+        grade_id=grade_id,
+        section_id=section_id,
+        academic_year_id=academic_year_id
+    ).first()
+
+    if not schools_grades_section:
+        return jsonify({"error": "Invalid school-grade-section mapping"}), 400
+    time_table = TimeTable.query.filter_by(
+        school_id=school_id,
+        academic_year_id=academic_year_id,
+        schools_grades_sections_id=schools_grades_section.id
+    ).first()
+    if not time_table:
+        time_table = TimeTable(
+            school_id=school_id,
+            academic_year_id=academic_year_id,
+            schools_grades_sections_id=schools_grades_section.id
+        )
+        db.session.add(time_table)
+        db.session.commit()
+
+    for day_name, time_slot, subject_id, staff_id,order_number in zip(
+            request.form.getlist('day_name[]'),
+            request.form.getlist('time_slot[]'),
+            request.form.getlist('subject_id[]'),            
+            request.form.getlist('staff_id[]'),
+            request.form.getlist('order_number[]')
+    ):
+        if day_name and time_slot and subject_id:
+            detail = TimeTableDetails(
+                time_table_id=time_table.id,
+                day_name=day_name,
+                time_slot=time_slot,
+                subject_id=subject_id,
+                staff_id=staff_id,
+                order_number=order_number
+            )
+            db.session.add(detail)
+    
+    db.session.commit()
+    return jsonify({"message": "Timetable saved successfully"})
+
+@app.route('/api/timetable/<int:timetable_id>', methods=['DELETE'])
+def delete_timetable(timetable_id):
+    """Delete a timetable and its associated details."""
+    timetable = TimeTableDetails.query.get(timetable_id)
+    if not timetable:
+        return jsonify({"error": "Timetable not found"}), 404
+
+    db.session.delete(timetable)
+    db.session.commit()
+    return jsonify({"message": "Timetable deleted successfully"})
 
 
 if __name__ == '__main__':
