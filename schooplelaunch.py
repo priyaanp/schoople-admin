@@ -1,5 +1,7 @@
 import datetime
-from flask import Flask, render_template, request, redirect, url_for, jsonify,session
+import os
+from werkzeug.utils import secure_filename
+from flask import Flask, render_template, request, redirect, send_from_directory, url_for, jsonify,session
 from flask import session as flask_session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import Session
@@ -20,6 +22,16 @@ elif env == 'testing':
 elif env == 'production':
     app.config.from_object(ProductionConfig)
 
+UPLOAD_FOLDER = 'uploads/student_photos'  # Define your upload directory
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+# Ensure the upload directory exists
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads', 'student_photos')
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 # Initialize the database
 db.init_app(app)
 '''
@@ -35,6 +47,10 @@ def list_subscriptions():
     subscriptions = Subscription.query.all()  # Fetch all subscriptions
     return render_template('subscriptions.html', subscriptions=subscriptions)
     '''
+@app.route('/uploads/<path:filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
 @app.route('/subscriptions/list')
 def subscriptions():
     return render_template('subscriptions_datatable.html')
@@ -1187,7 +1203,7 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
-        user = User.query.filter_by(username=username).first()
+        user = User.query.filter_by(username=username,is_active=True).first()
   
         if user and check_password_hash(user.password, password):
             session['user_id'] = user.id
@@ -1743,7 +1759,13 @@ def add_student():
         school_id = session.get('school_id')  # Get school_id from session
         if not school_id:
             return jsonify({'error': 'School ID is not set in the session'}), 400
-
+        photo_path = None
+        if 'photo' in request.files:
+            photo = request.files['photo']
+            if photo and allowed_file(photo.filename):
+                # Secure the filename and save the photo
+                filename = secure_filename(photo.filename)            
+                photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename)) 
         # Retrieve student details from form
         student_data = {
             'school_id': school_id,
@@ -1753,7 +1775,7 @@ def add_student():
             'last_name': request.form.get('last_name'),
             'dob': request.form.get('dob'),
             'aadhar_number': request.form.get('aadhar_number'),
-            'photo': request.form.get('photo'),
+            'photo': filename,
             'date_of_admission': request.form.get('date_of_admission'),
             'admission_number': request.form.get('admission_number'),
             'identification_mark': request.form.get('identification_mark'),
@@ -1836,6 +1858,17 @@ def edit_student(id):
     student = Student.query.get_or_404(id)
     user = User.query.filter_by(student_id=id).first()
     school_student = SchoolStudent.query.filter_by(student_id=id).first()
+    file = request.files.get('photo')
+    photo_filename = None
+
+    # Handle photo only if uploaded, otherwise keep existing if editing
+    if file and file.filename.strip():
+        filename = secure_filename(file.filename)
+        photo_filename = filename
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    else:
+        # Preserve existing photo if available
+        photo_filename = request.form.get('existing_photo')  
     if request.method == 'POST':
         # Update student details
         student.student_code = request.form.get('student_code')
@@ -1844,7 +1877,7 @@ def edit_student(id):
         student.last_name = request.form.get('last_name')
         student.dob = request.form.get('dob')
         student.aadhar_number = request.form.get('aadhar_number')
-        student.photo = request.form.get('photo')
+        student.photo = photo_filename
         student.date_of_admission = request.form.get('date_of_admission')
         student.admission_number = request.form.get('admission_number')
         student.identification_mark = request.form.get('identification_mark')
@@ -1926,7 +1959,7 @@ def edit_student(id):
     academic_years = AcademicYear.query.all()
     transports = Transport.query.filter_by(school_id=session['school_id']).all()
     houses = House.query.filter_by(school_id=session['school_id']).all()
-    print(users)
+
     return render_template(
         'student_form.html',
         student=student,
@@ -2369,8 +2402,7 @@ def staffs_grades_list():
 def get_staffs_grades():
     """Fetch Staff Grades data, filtered by school."""
     school_id = session.get('school_id')
-    print("school_id")
-    print(school_id)
+
     if not school_id:
         return jsonify({"error": "School ID not found in session"}), 400
 
@@ -2409,7 +2441,6 @@ def get_staffs_grades():
 def add_edit_staffs_grades(id=None):
     """Add or Edit Staff Grade."""
     # Fetch existing data for editing if an ID is provided
-    print("Received ID:", id)
 
     staff_grade = StaffsGrades.query.get(id) if id else None
 
@@ -2490,7 +2521,6 @@ def add_edit_staffs_grades(id=None):
 
         # Handle Add
         else:
-            print("222222222222222222222222222222")
             for grade_id, division_id, subject_id in zip(grades_list, divisions_list, subjects_list):
                 sgs = SchoolsGradesSections.query.filter_by(
                     school_id=school_id,
@@ -2544,7 +2574,6 @@ def add_edit_staffs_grades(id=None):
            # for sg in StaffsGrades.query.filter_by(staff_id=staff_grade.staff_id).all()
            for sg in StaffsGrades.query.filter_by(id=id).all()
         ]
-    print("aaaaaaaaaaaaaaaaaaaaaaaa00",rows)
     return render_template(
         'staffs_grades_form.html',
         staffs_grades=staff_grade,
@@ -2756,7 +2785,7 @@ def save_exam_marks():
 
     db.session.commit()
     return jsonify({"message": "Marks saved successfully"}), 200
-@app.route('/attendance', methods=['GET'])
+@app.route('/attendances', methods=['GET'])
 def attendance_page():
     school_id = session.get('school_id')  # Fetch the school ID from session
 
@@ -2922,7 +2951,6 @@ def get_timetable():
 
     if not schools_grades_section:
         return jsonify({"data": []})
-    print("Received ID:",schools_grades_section.id)
     timetables = TimeTable.query.filter_by(
         school_id=school_id,
         academic_year_id=academic_year_id,
