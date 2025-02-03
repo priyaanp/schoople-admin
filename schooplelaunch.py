@@ -34,19 +34,21 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 # Initialize the database
 db.init_app(app)
-'''
-@app.route('/')
-def list_subscriptions():
-    
-    prime_active_subscriptions = Subscription.query.filter(
-    Subscription.type == 'Prime',
-    Subscription.status == True
-    ).all()
-    
 
-    subscriptions = Subscription.query.all()  # Fetch all subscriptions
-    return render_template('subscriptions.html', subscriptions=subscriptions)
-    '''
+# List of routes that do not require login
+PUBLIC_ROUTES = ['/login', '/static', '/api/public-endpoint']
+
+@app.before_request
+def check_login():
+    # Allow public routes without login
+    if request.path in PUBLIC_ROUTES or request.path.startswith('/static'):
+        return  # Allow access
+
+    # Redirect to login if user is not logged in
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+
+
 @app.route('/uploads/<path:filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)

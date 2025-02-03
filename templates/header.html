@@ -25,6 +25,7 @@
                 <div class="profile-view">
                     <div class="profile-image">{{ session['username'][:1] }}</div>
                     <div class="profile-name">{{ session['username'] }}</div>
+                    <a href="javascript:logout()">Click</a>
                 </div>
                 <div class="profile-details">
                     <div class="profile-info"><span class="welcome">Welcome</span> {{ session['username'] }} !</div>
