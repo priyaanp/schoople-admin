@@ -1653,10 +1653,15 @@ SELECT pg_catalog.setval('public.academic_years_id_seq', 4, true);
 --
 
 COPY public.attendances (id, student_id, staff_id, schools_grades_sections_id, is_hourly, attendence_date, period, time_slot, is_present_morning, is_present_afternoon, created_by, created_on, updated_by, updated_on) FROM stdin;
-9	3	1	1	f	2025-01-28	\N	\N	t	f	1	2025-01-28 20:31:16.099636	\N	\N
-10	5	1	1	f	2025-01-28	\N	\N	t	f	1	2025-01-28 20:31:16.099636	\N	\N
 11	3	1	1	f	2025-01-27	\N	\N	t	t	1	2025-01-28 20:32:38.645175	\N	\N
 12	5	1	1	f	2025-01-27	\N	\N	t	t	1	2025-01-28 20:32:38.658247	\N	\N
+9	3	1	1	f	2025-01-28	\N	\N	t	f	1	2025-01-28 20:31:16.099636	1	2025-01-29 23:47:02.444615
+10	5	1	1	f	2025-01-28	\N	\N	f	f	1	2025-01-28 20:31:16.099636	1	2025-01-29 23:47:02.446627
+13	3	1	1	f	2025-01-29	\N	\N	t	t	1	2025-01-29 23:46:58.398444	1	2025-01-29 23:47:09.797397
+14	5	1	1	f	2025-01-29	\N	\N	t	t	1	2025-01-29 23:46:58.403507	1	2025-01-29 23:47:09.799395
+15	3	1	1	f	2025-02-03	\N	\N	f	f	1	2025-02-03 00:07:06.909338	\N	\N
+16	5	1	1	f	2025-02-03	\N	\N	f	f	1	2025-02-03 00:07:06.969727	\N	\N
+17	6	1	1	f	2025-02-03	\N	\N	f	f	1	2025-02-03 00:07:06.976747	\N	\N
 \.
 
 
@@ -1664,7 +1669,7 @@ COPY public.attendances (id, student_id, staff_id, schools_grades_sections_id, i
 -- Name: attendances_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.attendances_id_seq', 12, true);
+SELECT pg_catalog.setval('public.attendances_id_seq', 17, true);
 
 
 --
@@ -1714,12 +1719,12 @@ COPY public.exam_mark_details (id, exam_mark_id, evaluation_type, weightage, mar
 15	13	\N	20	99	100
 13	11	\N	20	290	300
 14	12	\N	20	180	300
-12	10	\N	10	80	100
-11	9	\N	10	80.5	100
 17	15	\N	20	98	100
 16	14	\N	20	77	100
 18	16	\N	1	24	25
 19	17	\N	1	20	25
+11	9	\N	10	80.5	100
+12	10	\N	10	90	100
 \.
 
 
@@ -1854,13 +1859,15 @@ COPY public.modules (id, module_name, menu_name, parent_id, is_active, is_visibl
 11	Staff Assignment	Staff Assignment	\N	t	f	staff_assignment/list	13
 22	Staff Types	Staff Types	\N	t	f	staff_types/list	11
 12	Exams	Exams	\N	t	f	exam-marks	16
-13	Attendances	Attendances	\N	t	f	attendance	14
 14	Subjects	Subjects	\N	t	f	subjects/list	15
 15	Transports	Transports	\N	t	f	transports/list	17
 16	Grades	Grades	\N	t	f	grades/list	18
 17	Sections	Sections	\N	t	f	sections/list	19
 21	Houses	Houses	\N	t	f	houses/list	20
 4	Clubs	Clubs	\N	t	t	clubs/list	21
+25	Timetable	Timetable	\N	t	f	timetable-manage	22
+13	Attendances	Attendances	\N	t	f	attendances	14
+26	Grade and Section Config	Grade and Section Config	\N	t	f	schools-grades-sections/list	7
 \.
 
 
@@ -1868,7 +1875,7 @@ COPY public.modules (id, module_name, menu_name, parent_id, is_active, is_visibl
 -- Name: modules_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.modules_id_seq', 24, true);
+SELECT pg_catalog.setval('public.modules_id_seq', 26, true);
 
 
 --
@@ -1947,8 +1954,9 @@ SELECT pg_catalog.setval('public.school_fee_id_seq', 1, false);
 --
 
 COPY public.school_student (id, student_id, house_id, clubs, school_grade_section_id, academic_year_id, transport_id, status, roll_number) FROM stdin;
-3	5	1	Raman	1	4	1	t	3
 2	4	1	tets	2	1	1	t	1
+4	6	1	tets	1	1	1	t	3
+3	5	1	Raman	1	4	1	t	2
 1	3	1	tets	1	1	1	t	1
 \.
 
@@ -1957,7 +1965,7 @@ COPY public.school_student (id, student_id, house_id, clubs, school_grade_sectio
 -- Name: school_student_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.school_student_id_seq', 3, true);
+SELECT pg_catalog.setval('public.school_student_id_seq', 4, true);
 
 
 --
@@ -2008,6 +2016,8 @@ COPY public.school_subscription_module_role_permission (id, school_subscription_
 24	4	23	3	2
 25	4	24	3	2
 26	4	7	3	2
+27	4	25	3	2
+28	4	26	3	2
 \.
 
 
@@ -2015,7 +2025,7 @@ COPY public.school_subscription_module_role_permission (id, school_subscription_
 -- Name: school_subscription_module_role_permission_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.school_subscription_module_role_permission_id_seq', 26, true);
+SELECT pg_catalog.setval('public.school_subscription_module_role_permission_id_seq', 28, true);
 
 
 --
@@ -2131,9 +2141,10 @@ SELECT pg_catalog.setval('public.staffs_id_seq', 5, true);
 --
 
 COPY public.students (id, school_id, student_code, first_name, middle_name, last_name, dob, aadhar_number, photo, date_of_admission, admission_number, identification_mark, interests, hobbies, student_email, religion, caste, permanent_address, communication_address, mother_name, father_name, father_qualification, mother_qualification, father_occupation, mother_occupation, father_mobile, mother_mobile, father_email, mother_email, annual_income, blood_group, mother_tongue, is_single_girl, is_minority, sibling_status, relieving_date, relieving_comment, status) FROM stdin;
+6	1	S456	Remya	N	N	2025-02-02	123456	Schoople_Website_1.png	2025-02-01	123	ASD	ASD	ASD	remya@gmail.com	\N	qwe	EC Nilayam	CHENGALTHADAM	AD	SANITH	a	s	d	f	09961094941	09961094941	sanith.e@gmail.com	TEST@TEST11	12321	A+VE	M	f	f	f	\N	\N	1
+5	1	TESTCODE1	Ishani	Sanith	E	2015-05-22	AADHARNO987	\N	2024-12-01	8141	ASD	TEST INT	HOBBY	ishanisanith@gmail.com	\N	test	EC NILAYAM, CHENGALTHADAM	PAYANGADI, KANNUR	PRIYA	SANITH	MSC	MCA	SOFTWARE ENGINEER	SOFTWARE ENGINEER	9947006717	9961094941	sanith.e@gmail.com	priyaa.np@gmail.com	5454	O+VE	Malayalam	t	t	t	\N	\N	1
 4	1	S456	PRIYANARAYANAN	P	P	2024-12-06	123456	\N	2024-12-04	123	ASD	ASD	ASD	TEST@TEST	ASD	qwe	EC Nilayam	CHENGALTHADAM	AD	ASD	a	s	d	f	09961094941	09947006717	TEST@TEST	TEST@TEST11	12321	A+VE	M	t	t	t	\N	\N	1
-5	1	TESTCODE1	Ishani	Sanith	E	2015-05-22	AADHARNO987	C4 MDP TERM2 - 24-25 (2).pdf	2024-12-01	8141	ASD	TEST INT	HOBBY	ishanisanith@gmail.com	\N	test	EC NILAYAM, CHENGALTHADAM	PAYANGADI, KANNUR	PRIYA	SANITH	MSC	MCA	SOFTWARE ENGINEER	SOFTWARE ENGINEER	9947006717	9961094941	sanith.e@gmail.com	priyaa.np@gmail.com	5454	O+VE	Malayalam	t	t	t	\N	\N	1
-3	1	SCODE	Sanith	P	E	2024-12-01	123456	C4 MDP TERM2 - 24-25 (2).pdf	2024-12-05	123	ASD	ASD	ASD	TEST@TEST	\N	qwe	EC NILAYAM, CHENGALTHADAM	PAYANGADI, KANNUR	AD	ASD	a	s	d	f	09947006717	09947006717	TEST@TEST	TEST@TEST11	12321	A+VE	M	t	t	t	\N	\N	1
+3	1	SCODE	Sanith	P	E	2024-12-01	123456	PRIYA_1.jpg	2024-12-05	123	ASD	ASD	ASD	TEST@TEST	\N	qwe	EC NILAYAM, CHENGALTHADAM	PAYANGADI, KANNUR	AD	ASD	a	s	d	f	09947006717	09947006717	TEST@TEST	TEST@TEST11	12321	A+VE	M	t	t	t	\N	\N	1
 \.
 
 
@@ -2156,7 +2167,7 @@ SELECT pg_catalog.setval('public.students_grades_id_seq', 1, false);
 -- Name: students_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.students_id_seq', 5, true);
+SELECT pg_catalog.setval('public.students_id_seq', 6, true);
 
 
 --
@@ -2214,6 +2225,9 @@ SELECT pg_catalog.setval('public.subscriptions_id_seq', 8, true);
 --
 
 COPY public.time_table_details (id, time_table_id, day_name, order_number, time_slot, subject_id, staff_id) FROM stdin;
+18	13	Monday	1	9:00 - 10:00	1	5
+19	13	Monday	2	10 - 11	2	1
+20	13	Monday	3	11-12	1	2
 \.
 
 
@@ -2221,7 +2235,7 @@ COPY public.time_table_details (id, time_table_id, day_name, order_number, time_
 -- Name: time_table_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.time_table_details_id_seq', 1, false);
+SELECT pg_catalog.setval('public.time_table_details_id_seq', 24, true);
 
 
 --
@@ -2229,6 +2243,7 @@ SELECT pg_catalog.setval('public.time_table_details_id_seq', 1, false);
 --
 
 COPY public.time_tables (id, school_id, academic_year_id, schools_grades_sections_id) FROM stdin;
+13	1	1	1
 \.
 
 
@@ -2236,7 +2251,7 @@ COPY public.time_tables (id, school_id, academic_year_id, schools_grades_section
 -- Name: time_tables_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.time_tables_id_seq', 1, false);
+SELECT pg_catalog.setval('public.time_tables_id_seq', 13, true);
 
 
 --
@@ -2272,7 +2287,13 @@ COPY public.user_roles (id, user_id, role_id) FROM stdin;
 72	5	1
 73	7	1
 74	7	1
+75	1	2
+76	1	3
 18	2	1
+77	1	1
+78	10	3
+79	10	3
+80	10	1
 52	10	3
 53	4	1
 57	6	1
@@ -2284,7 +2305,7 @@ COPY public.user_roles (id, user_id, role_id) FROM stdin;
 -- Name: user_roles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.user_roles_id_seq', 74, true);
+SELECT pg_catalog.setval('public.user_roles_id_seq', 80, true);
 
 
 --
@@ -2292,16 +2313,25 @@ SELECT pg_catalog.setval('public.user_roles_id_seq', 74, true);
 --
 
 COPY public.users (id, staff_id, student_id, username, password, is_active) FROM stdin;
+24	\N	3	sanith2	scrypt:32768:8:1$zflQbflwyU0zpvr1$61e27536fb65491862f04dd7d72fe5341b97edb8517ae8c70f91c3748fe40d1656bb592b1e1cd42703edbce8ed07d65c8115ea0fdfe8451f8df2f093833ae140	t
 7	4	\N	jacob	scrypt:32768:8:1$qrrYO6x1vlCu1mJO$ff52cce6b32783a500a3117679b227dafbc482e4cfad9e07c148339b99762f32a50ea999bc77f39574538ebf92cc230410f941f425fea5427fcdf06c8a65239c	t
 14	\N	\N	sanith	scrypt:32768:8:1$spt7RPQwLDeJMW51$785beadaac077c27c131cc95d3d1a0039795c390b9a0ec46e43fc65be04f4e86f076e0d11677a2f9756351b8ca2601cca1aefa80f23d7552800c4e6b6546c834	f
-13	\N	5	ishanisanith	scrypt:32768:8:1$g428AASZzEy76hKo$ad263d3b2fae67cd8df08678dd5a53a7355614592cafa5a3052f1db0cf11b288096b8f3d8f710c38df90a04019d41dae3d456096afb66c8ae9fe60421347ebe1	t
 15	\N	\N	ishanisanith	scrypt:32768:8:1$KVXMzoIttMxJ3dHk$3ca3dea914065b4e1a3c07777c217c67dc45a00d44e07dfed8558675b7c3ecb615adfaa1632a2515c4e9f326e742349f66b49b054874500c3404d2b6f847d9f6	f
+1	\N	\N	sanith1	scrypt:32768:8:1$uW6cdlFECIDadrgf$97414d2d673966913894809ded3698613f3fee35ed13ec4182cc5a102c6aa3bc0351fc89316ece8247cd7f0cad60665e924ec9e1a8ee9c694cfb9f664ce969da	t
+10	5	\N	ishani	scrypt:32768:8:1$cYHgBIKSNTpnYoVr$e38fa23e164defdbdf7eeb170304a78b0e59f529bf19aa54c08913a4237abfe3d1276e8c41f149a8a7adb7ffe9ffa19653d1a23acc5a74de2fef0cf014270745	f
+16	\N	\N	sanith1	scrypt:32768:8:1$6OaRUMRWpyFOaHSB$546e65e5873ff7033a1d4b2b2ed60f290f603ed66f7dafc1820fe22f39e3b1003e582b2856e167e8db07e4243fa41ce69f4ba31fecf10b3182e84f72f69136ee	f
 6	3	\N	ammu	scrypt:32768:8:1$ziJKns4TbyzNndJ6$05bb28d8d86162bd3904244251403f324233576e8dd82f82e4cee1b49858f212f88c301486e1b7cdc5e22f7ab2e559dd0deb334d3a62f75b6b9e721ef96a1d46	t
-1	\N	\N	sanith	scrypt:32768:8:1$2XBMGTJ4kRlZjRpN$9be2ac1202d62f304ad1dfaabb1fda0b6e2c4900afbd3e00d259a3a77b3b1328fd649bbe76d311cb59f8c0ad2820ce71b56cc850938cbe7b8ac7aac4d831dde5	t
+17	\N	\N	sanith1	scrypt:32768:8:1$WMPETwebGBQs5hr8$8cc85d675f880dac51d0cd6873a725a2f0186747d490c4d1928fbbafa60a3ea1bb789af863906b6063afda09cd3db730abf1f6e3d9fb69c7330932388b3b996a	f
+18	\N	\N	sanith1	scrypt:32768:8:1$QtnPPFrxKEfFjnId$0d03469232a2d5244cbb1e592cd3ac111653e46226d5cfadf7844773b5b001437dce2cb49a74d5d6382a2d2776f4b141ab8ab98df8b017d4bcb160eee9c1bda1	f
+19	\N	\N	sanith1	scrypt:32768:8:1$mbhceKurL8qbddic$7467821df1456e0297db9feec7e5ad696c5f159372e40e1c9253cded98b13d7c60654d76f38c9f79fb97a03c8fed8548562bd0244ea8ebf37fee4075936eb0bd	f
+20	\N	\N	sanith1	scrypt:32768:8:1$PFwvwT31UjtALY5i$2ce738fd99e8a77718004284875ef93d28a4ea5490c30fd8d5f217331839b40e1966bd78ec76954f790bef912f24995b125fa1c6115145584a8c51fd4cce21d8	f
 2	\N	\N	Priya	scrypt:32768:8:1$0edyXONXDCkT3yDO$fb3600bf8881165fed7ac1314f74a4a6a7719a6fd95f365ba0f86922790f337702a31681a40bab5a8cbeb61d780794b35af53279330da9dfec2e9c9c41a0bbf7	t
-10	5	\N	ishani	scrypt:32768:8:1$WIUeGteOZsMvulBS$cd103484b56765d19b543118b7c121837f65bde1d87d63b116b0b68ee1f5784500e9273f7962ed8287fab7dd696f3fee64f5509341ad3071ca4e6db1f361f51d	t
+21	\N	\N	sanith1	scrypt:32768:8:1$vhx8CMPjqVtotXuR$a217b0094e4179a41201d696d203e955fe5d768c550bbe97baa2f6b89e38723971101672ae2d7fb0a9574f0f7e19a8c3a2c7154c87e7f6004687745effdb533c	f
+22	\N	\N	sanith1	scrypt:32768:8:1$VuS1WNtj0iH2NoiL$9ff201e1d190806f0787622c6d4f6595dee87c93c01c673acf06377ee8ee591b421ee529850aebc49471602dab5c86cb7be3e9f235dfd53987132e4768472c2d	f
 4	1	\N	sanithuser	scrypt:32768:8:1$EpuZBvMiL2Hos5PU$01900230a8d1216ee6bd4d0cbd7f24762cad4278f527bb37fe2137d7784c239fd881af3c8a70b56de95ecec7251be83b11cdaabc82d3ff694f32fea397abc32e	t
 5	2	\N	priyanp	scrypt:32768:8:1$e867CGlvgvqd1qt8$1898c0852bab3ddb1f24f2b361983994479744cd495e46d8961059b0d5b34ea2a4519006a852cb718c1f68be65926fd3c33653150524af7dbdfff7f610f3e7bd	t
+23	\N	6	remya	scrypt:32768:8:1$Q33IWX33lZQNzHTx$f65023f1e718f3f1e82342e26964eb96a25ce834223282e141ad287b19cc1c6ca0640cf45077815a6dcdc10035da68dd1e28e25414eeb936e9ff45f7b787758a	t
+13	\N	5	ishanisanith	scrypt:32768:8:1$F0xGlBMJPqB8rKEE$350b6acf21014cd4fa6ffa38128abcfc65dc58e1d5d79356385d0591b59d89c950882a20d3fd8df5914c8fd9c1d891f4b5bcdada73fb7760e1e0de28f06c75ca	t
 11	\N	4	asd	scrypt:32768:8:1$gK89pj9kovqsN927$bb0f6b5ab2dba0fa16adb19b26f94fe2df7c9261f6f39bea67f5547a576f3b1e9cb2452e15d1b2e516e7aab6049b8c979d47f91ed3e13a76e829241373532ec6	t
 12	\N	\N	asd	scrypt:32768:8:1$oZR9K44DZsHcTmyj$c80a66e6e6dcdd33a84f11d209dac2366706391e8f73e4a819c2e2676b88b0633e13f6f477bbe3dd697ef3dacc93b27bc5b6c021c8bbf30a385565467012d08c	f
 \.
@@ -2311,7 +2341,7 @@ COPY public.users (id, staff_id, student_id, username, password, is_active) FROM
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 15, true);
+SELECT pg_catalog.setval('public.users_id_seq', 24, true);
 
 
 --
