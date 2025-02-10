@@ -1,0 +1,42 @@
+{% extends 'baseform.html' %}
+
+{% block title %}Add Events{% endblock %}
+
+{% block content %}
+<div class="container mt-5 form-field-container">
+    <h4>{{ 'Edit' if event else 'Add' }} Events</h4>
+    <form id="eventForm">
+        <input type="hidden" name="id" value="{{event.id if event}}">
+        <div class="mb-3 form-el-div-wraper">
+            <label for="title" class="form-label">Title</label>
+            <input type="text" class="form-control" id="title" name="title" value="{{event.title if event else '' }}" required>
+        </div>
+        <div class="mb-3 form-el-div-wraper">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" name="description">{{ event.description if event else ''  }}</textarea>
+        </div>
+        <div class="mb-3 form-el-div-wraper">
+            <label for="date" class="form-label">Date</label>
+            <input type="datetime-local" class="form-control" id="date" name="date" value="{{event.date if event else '' }}" required>
+        </div>
+        <div class="button-container">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a href="/events/list" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+
+        $('#eventForm').on('submit', function (e) {
+            e.preventDefault();
+            $.post('/api/events/save', $(this).serialize(), function () {
+                window.location.href = '/events/list';
+            });
+        });
+    });
+</script>
+{% endblock %}
+

@@ -6,7 +6,7 @@ from flask import session as flask_session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text 
-from models import Club, Grade, House, SchoolStudent, SchoolsGradesSections, Section, StaffsGrades, Student, Subject, TimeTable, TimeTableDetails, Transport, db, Offer,Subscription,Role,User,UserRole,Permission,School,AcademicYear,SchoolSubscription,Module,SchoolSubscriptionModuleRolePermission,StaffType,Staff,ExamMarks,ExamMarkDetails,Attendance
+from models import Club, Event, Grade, House, SchoolStudent, SchoolsGradesSections, Section, StaffsGrades, Student, Subject, TimeTable, TimeTableDetails, Transport, db, Offer,Subscription,Role,User,UserRole,Permission,School,AcademicYear,SchoolSubscription,Module,SchoolSubscriptionModuleRolePermission,StaffType,Staff,ExamMarks,ExamMarkDetails,Attendance
 from werkzeug.security import check_password_hash
 from config import DevelopmentConfig, TestingConfig, ProductionConfig
 
@@ -1213,7 +1213,7 @@ def login():
             session['role'] = user_role(user.id)  # Fetch user's role dynamically
             session['role_id'] = user_role_id(user.id)  # Fetch user's role dynamically
             session['is_superadmin'] = is_superadmin(user.id) 
-
+            print("user.id",user.id)
             if(user.staff_id): 
                 get_subscription(user.staff_id) 
             
@@ -3051,6 +3051,85 @@ def delete_timetable(timetable_id):
     return jsonify({"message": "Timetable deleted successfully"})
 
 
+@app.route('/events/list')
+def list_events():
+    return render_template('events_list.html')
+
+# Add/Edit Event Page
+@app.route('/events/add')
+def manage_event_page():
+    return render_template('events_manage.html')
+
+# API for DataTable
+@app.route('/api/events', methods=['GET'])
+def get_events():
+    school_id = session.get('school_id')
+    filter_type = request.args.get('filter_type', 'upcoming')
+    query = Event.query.filter_by(school_id=school_id)
+
+    # Filtering based on date
+    now = datetime.datetime.now()
+    if filter_type == 'upcoming':
+        query = query.filter(Event.date >= now)
+    elif filter_type == 'finished':
+        query = query.filter(Event.date < now)
+
+    events =  query.order_by(getattr(Event, "date").asc()).all()
+    
+    data = [
+        {
+            "id": event.id,
+            "title": event.title,
+            "description": event.description,
+            "date": event.date.strftime("%Y-%m-%d %H:%M"),
+            "status": "Upcoming" if event.date >= now else "Finished",
+        }
+        for event in events
+    ]
+    return jsonify({"data": data})
+
+# Add or Edit Event
+@app.route('/api/events/save', methods=['POST','GET'])
+def manage_event():
+    event_id = request.form.get('id')
+    title = request.form['title']
+    description = request.form['description']
+    date = request.form['date']
+
+    if event_id:  # Update existing event
+        event = Event.query.get(event_id)
+        event.title = title
+        event.description = description
+        event.date = datetime.datetime.fromisoformat(date)
+    else:  # Add new event
+        school_id = session.get('school_id')
+        new_event = Event(
+            school_id=school_id,
+            title=title,
+            description=description,
+            date=datetime.datetime.fromisoformat(date)
+        )
+        db.session.add(new_event)
+
+    db.session.commit()
+    return jsonify({"message": "Event saved successfully"})
+
+# Delete Event
+@app.route('/api/events/delete/<int:event_id>', methods=['DELETE'])
+def delete_event(event_id):
+    event = Event.query.get_or_404(event_id)
+    db.session.delete(event)
+    db.session.commit()
+    return jsonify({"message": "Event deleted successfully"})
+
+
+@app.route('/events/edit/<int:id>', methods=['GET', 'POST'])
+def edit_events(id):
+    """Edit an existing event."""   
+  
+    event = Event.query.get(id)
+    print("title",event.title)
+    return render_template('events_manage.html', event=event)
 if __name__ == '__main__':
     app.run(debug=True)
 
