@@ -504,7 +504,8 @@ def edit_user(id):
             user.set_password(new_password) 
         # Clear existing roles
         
-
+        UserRole.query.filter_by(user_id=user.id).delete() 
+        db.session.commit()
         # Assign new roles
         for role_id in role_ids:
             user_role = UserRole(user_id=user.id, role_id=role_id)

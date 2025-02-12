@@ -1653,15 +1653,15 @@ SELECT pg_catalog.setval('public.academic_years_id_seq', 4, true);
 --
 
 COPY public.attendances (id, student_id, staff_id, schools_grades_sections_id, is_hourly, attendence_date, period, time_slot, is_present_morning, is_present_afternoon, created_by, created_on, updated_by, updated_on) FROM stdin;
-11	3	1	1	f	2025-01-27	\N	\N	t	t	1	2025-01-28 20:32:38.645175	\N	\N
 12	5	1	1	f	2025-01-27	\N	\N	t	t	1	2025-01-28 20:32:38.658247	\N	\N
-9	3	1	1	f	2025-01-28	\N	\N	t	f	1	2025-01-28 20:31:16.099636	1	2025-01-29 23:47:02.444615
 10	5	1	1	f	2025-01-28	\N	\N	f	f	1	2025-01-28 20:31:16.099636	1	2025-01-29 23:47:02.446627
-13	3	1	1	f	2025-01-29	\N	\N	t	t	1	2025-01-29 23:46:58.398444	1	2025-01-29 23:47:09.797397
 14	5	1	1	f	2025-01-29	\N	\N	t	t	1	2025-01-29 23:46:58.403507	1	2025-01-29 23:47:09.799395
-15	3	1	1	f	2025-02-03	\N	\N	f	f	1	2025-02-03 00:07:06.909338	\N	\N
-16	5	1	1	f	2025-02-03	\N	\N	f	f	1	2025-02-03 00:07:06.969727	\N	\N
-17	6	1	1	f	2025-02-03	\N	\N	f	f	1	2025-02-03 00:07:06.976747	\N	\N
+17	6	1	1	f	2025-02-03	\N	\N	t	f	1	2025-02-03 00:07:06.976747	\N	\N
+16	5	1	1	f	2025-02-05	\N	\N	f	f	1	2025-02-03 00:07:06.969727	\N	\N
+15	3	1	1	f	2025-02-04	\N	\N	t	f	1	2025-02-03 00:07:06.909338	\N	\N
+13	3	1	1	f	2025-01-29	\N	\N	f	f	1	2025-01-29 23:46:58.398444	1	2025-01-29 23:47:09.797397
+11	3	1	1	f	2025-02-09	\N	\N	t	t	1	2025-01-28 20:32:38.645175	\N	\N
+9	3	1	1	f	2025-02-12	\N	\N	f	t	1	2025-01-28 20:31:16.099636	1	2025-01-29 23:47:02.444615
 \.
 
 
@@ -1701,6 +1701,14 @@ SELECT pg_catalog.setval('public.clubs_id_seq', 14, true);
 --
 
 COPY public.events (id, school_id, title, description, date) FROM stdin;
+1	1	Even 1	test	2025-02-15 20:30:00
+3	2	Test school 2	test	2025-02-20 23:45:00
+4	1	Even 2	test	2025-02-15 20:30:00
+12	1	Events333	test	2025-02-10 13:58:00
+13	1	444	4444	2025-02-10 22:03:00
+14	1	777777777	\N	2025-02-10 22:13:00
+15	1	1112233	test	2025-02-28 22:24:00
+16	1	Exam	test	2025-02-12 23:41:00
 \.
 
 
@@ -1708,7 +1716,7 @@ COPY public.events (id, school_id, title, description, date) FROM stdin;
 -- Name: events_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.events_id_seq', 1, false);
+SELECT pg_catalog.setval('public.events_id_seq', 16, true);
 
 
 --
@@ -1725,6 +1733,7 @@ COPY public.exam_mark_details (id, exam_mark_id, evaluation_type, weightage, mar
 19	17	\N	1	20	25
 11	9	\N	10	80.5	100
 12	10	\N	10	90	100
+20	20	\N	10	60	100
 \.
 
 
@@ -1732,7 +1741,7 @@ COPY public.exam_mark_details (id, exam_mark_id, evaluation_type, weightage, mar
 -- Name: exam_mark_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.exam_mark_details_id_seq', 19, true);
+SELECT pg_catalog.setval('public.exam_mark_details_id_seq', 20, true);
 
 
 --
@@ -1749,6 +1758,7 @@ COPY public.exam_marks (id, term, student_id, subject_id, staff_id) FROM stdin;
 15	First	5	2	1
 16	Second	5	2	1
 17	Second	3	2	1
+20	First	6	1	25
 \.
 
 
@@ -1756,7 +1766,7 @@ COPY public.exam_marks (id, term, student_id, subject_id, staff_id) FROM stdin;
 -- Name: exam_marks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.exam_marks_id_seq', 17, true);
+SELECT pg_catalog.setval('public.exam_marks_id_seq', 20, true);
 
 
 --
@@ -2110,6 +2120,7 @@ COPY public.staffs (id, school_id, staff_type_id, first_name, middle_name, last_
 1	1	6	Sanith	E	E	EC NILAYAM, CHENGALTHADAM	PAYANGADI, KANNUR	A+VE	Msc	t	TEST1	t	DASD	2024-11-26	2024-11-28	ASDSAD	t
 2	1	1	PRIYANARAYANAN	P	P	EC Nilayam	CHENGALTHADAM	A+VE	MCA	t	ASD	t	ASD	2024-11-15	2024-11-22	ASD	t
 4	1	7	Mr. Jacob	P	Varghese	EC Nilayam\r\nCHENGALTHADAM	EC Nilayam\r\nCHENGALTHADAM	A+VE	B-Tech	t	test	t	test	2024-11-01	2024-11-29		t
+6	1	1	Ammu	I	Sanith	test	test	0+	mca	t	A	t	A	2025-02-12	2025-02-14	asd	t
 \.
 
 
@@ -2133,7 +2144,7 @@ SELECT pg_catalog.setval('public.staffs_grades_id_seq', 2, true);
 -- Name: staffs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.staffs_id_seq', 5, true);
+SELECT pg_catalog.setval('public.staffs_id_seq', 6, true);
 
 
 --
@@ -2260,6 +2271,7 @@ SELECT pg_catalog.setval('public.time_tables_id_seq', 13, true);
 
 COPY public.transports (id, school_id, driver_id, driver_code, vehicle_number, route_number, route_name, vehicle_gps_device_id, vehicle_tracking_url, in_charge_id) FROM stdin;
 1	1	1	TESTCODE	KL13T8475	4	TEST EQ	123	12321	4
+2	1	4	JAC123	KL86A5035	123	HMT	46456	WETER	5
 \.
 
 
@@ -2267,7 +2279,7 @@ COPY public.transports (id, school_id, driver_id, driver_code, vehicle_number, r
 -- Name: transports_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.transports_id_seq', 1, true);
+SELECT pg_catalog.setval('public.transports_id_seq', 34, true);
 
 
 --
@@ -2296,8 +2308,12 @@ COPY public.user_roles (id, user_id, role_id) FROM stdin;
 80	10	1
 52	10	3
 53	4	1
-57	6	1
 59	1	3
+81	24	3
+92	25	3
+93	25	3
+94	25	3
+95	25	3
 \.
 
 
@@ -2305,7 +2321,7 @@ COPY public.user_roles (id, user_id, role_id) FROM stdin;
 -- Name: user_roles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.user_roles_id_seq', 80, true);
+SELECT pg_catalog.setval('public.user_roles_id_seq', 95, true);
 
 
 --
@@ -2320,7 +2336,6 @@ COPY public.users (id, staff_id, student_id, username, password, is_active) FROM
 1	\N	\N	sanith1	scrypt:32768:8:1$uW6cdlFECIDadrgf$97414d2d673966913894809ded3698613f3fee35ed13ec4182cc5a102c6aa3bc0351fc89316ece8247cd7f0cad60665e924ec9e1a8ee9c694cfb9f664ce969da	t
 10	5	\N	ishani	scrypt:32768:8:1$cYHgBIKSNTpnYoVr$e38fa23e164defdbdf7eeb170304a78b0e59f529bf19aa54c08913a4237abfe3d1276e8c41f149a8a7adb7ffe9ffa19653d1a23acc5a74de2fef0cf014270745	f
 16	\N	\N	sanith1	scrypt:32768:8:1$6OaRUMRWpyFOaHSB$546e65e5873ff7033a1d4b2b2ed60f290f603ed66f7dafc1820fe22f39e3b1003e582b2856e167e8db07e4243fa41ce69f4ba31fecf10b3182e84f72f69136ee	f
-6	3	\N	ammu	scrypt:32768:8:1$ziJKns4TbyzNndJ6$05bb28d8d86162bd3904244251403f324233576e8dd82f82e4cee1b49858f212f88c301486e1b7cdc5e22f7ab2e559dd0deb334d3a62f75b6b9e721ef96a1d46	t
 17	\N	\N	sanith1	scrypt:32768:8:1$WMPETwebGBQs5hr8$8cc85d675f880dac51d0cd6873a725a2f0186747d490c4d1928fbbafa60a3ea1bb789af863906b6063afda09cd3db730abf1f6e3d9fb69c7330932388b3b996a	f
 18	\N	\N	sanith1	scrypt:32768:8:1$QtnPPFrxKEfFjnId$0d03469232a2d5244cbb1e592cd3ac111653e46226d5cfadf7844773b5b001437dce2cb49a74d5d6382a2d2776f4b141ab8ab98df8b017d4bcb160eee9c1bda1	f
 19	\N	\N	sanith1	scrypt:32768:8:1$mbhceKurL8qbddic$7467821df1456e0297db9feec7e5ad696c5f159372e40e1c9253cded98b13d7c60654d76f38c9f79fb97a03c8fed8548562bd0244ea8ebf37fee4075936eb0bd	f
@@ -2334,6 +2349,7 @@ COPY public.users (id, staff_id, student_id, username, password, is_active) FROM
 13	\N	5	ishanisanith	scrypt:32768:8:1$F0xGlBMJPqB8rKEE$350b6acf21014cd4fa6ffa38128abcfc65dc58e1d5d79356385d0591b59d89c950882a20d3fd8df5914c8fd9c1d891f4b5bcdada73fb7760e1e0de28f06c75ca	t
 11	\N	4	asd	scrypt:32768:8:1$gK89pj9kovqsN927$bb0f6b5ab2dba0fa16adb19b26f94fe2df7c9261f6f39bea67f5547a576f3b1e9cb2452e15d1b2e516e7aab6049b8c979d47f91ed3e13a76e829241373532ec6	t
 12	\N	\N	asd	scrypt:32768:8:1$oZR9K44DZsHcTmyj$c80a66e6e6dcdd33a84f11d209dac2366706391e8f73e4a819c2e2676b88b0633e13f6f477bbe3dd697ef3dacc93b27bc5b6c021c8bbf30a385565467012d08c	f
+25	6	\N	ammu	scrypt:32768:8:1$5vGsYfZyW9CYg2Xn$7e598baf9cabce4f613d0ad93d70203be583de01a5cbf6cf95b4ebad1295fc9307cc846a03ee23e38bbae405d013444af734016726a527fbdafdf728ffb6c212	t
 \.
 
 
@@ -2341,7 +2357,7 @@ COPY public.users (id, staff_id, student_id, username, password, is_active) FROM
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 24, true);
+SELECT pg_catalog.setval('public.users_id_seq', 25, true);
 
 
 --
@@ -2693,7 +2709,7 @@ ALTER TABLE ONLY public.exam_mark_details
 --
 
 ALTER TABLE ONLY public.exam_marks
-    ADD CONSTRAINT exam_marks_staff_id_fkey FOREIGN KEY (staff_id) REFERENCES public.staffs(id);
+    ADD CONSTRAINT exam_marks_staff_id_fkey FOREIGN KEY (staff_id) REFERENCES public.users(id);
 
 
 --
