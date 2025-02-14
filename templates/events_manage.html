@@ -1,10 +1,12 @@
 {% extends 'baseform.html' %}
 
-{% block title %}Add Events{% endblock %}
+{% block title %}Events{% endblock %}
 
 {% block content %}
 <div class="container mt-5 form-field-container">
-    <h4>{{ 'Edit' if event else 'Add' }} Events</h4>
+    <div class="form-page-header">
+        <h4>{{ 'Edit' if event else 'Add' }} Event</h4>
+    </div>
     <form id="eventForm">
         <input type="hidden" name="id" value="{{event.id if event}}">
         <div class="mb-3 form-el-div-wraper">

@@ -1,12 +1,12 @@
 import datetime
 import os
 from werkzeug.utils import secure_filename
-from flask import Flask, render_template, request, redirect, send_from_directory, url_for, jsonify,session
+from flask import Flask, flash, render_template, request, redirect, send_from_directory, url_for, jsonify,session
 from flask import session as flask_session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text 
-from models import Club, Event, Grade, House, SchoolStudent, SchoolsGradesSections, Section, StaffsGrades, Student, Subject, TimeTable, TimeTableDetails, Transport, db, Offer,Subscription,Role,User,UserRole,Permission,School,AcademicYear,SchoolSubscription,Module,SchoolSubscriptionModuleRolePermission,StaffType,Staff,ExamMarks,ExamMarkDetails,Attendance
+from models import Club, Event, ExamSchedule, Grade, House, SchoolStudent, SchoolsGradesSections, Section, StaffsGrades, Student, Subject, TimeTable, TimeTableDetails, Transport, db, Offer,Subscription,Role,User,UserRole,Permission,School,AcademicYear,SchoolSubscription,Module,SchoolSubscriptionModuleRolePermission,StaffType,Staff,ExamMarks,ExamMarkDetails,Attendance
 from werkzeug.security import check_password_hash
 from config import DevelopmentConfig, TestingConfig, ProductionConfig
 
@@ -2460,7 +2460,7 @@ def add_edit_staffs_grades(id=None):
 
     # Fetch dropdown data
     staffs = Staff.query.filter_by(school_id=school_id).all()  # Filter by school
-    grades = Grade.query.all()  # Retrieve all grades
+    grades = Grade.query.filter_by(school_id=school_id).all()    # Retrieve all grades
     divisions = Section.query.all()  # Retrieve all divisions
     subjects = Subject.query.filter_by(school_id=school_id).all()  # Filter by school
     transports = Transport.query.filter_by(school_id=school_id).all()  # Filter by school
@@ -2673,7 +2673,7 @@ def exam_marks():
     subjects = Subject.query.filter_by(school_id=school_id).all()
 
     return render_template('exam_marks.html', academic_years=academic_years, grades=grades, sections=sections,
-                           subjects=subjects,active_academic_year=active_academic_year, terms=['First', 'Second', 'Third'])
+                           subjects=subjects,active_academic_year=active_academic_year, terms=['First','Midterm 1', 'Second','Midterm 2', 'Third','Midterm 3'])
 
 
 @app.route('/exam-marks/students', methods=['POST'])
@@ -3131,6 +3131,103 @@ def edit_events(id):
     event = Event.query.get(id)
     print("title",event.title)
     return render_template('events_manage.html', event=event)
+@app.route('/exam-schedules/list')
+def examschedules():
+    school_id = session.get('school_id')  # Fetch the school ID from session
+
+    grades = Grade.query.filter_by(school_id=school_id).all() 
+    return render_template('exam_schedules_list.html',grades=grades)
+
+@app.route('/api/exam_schedules', methods=['GET'])
+def list_exam_schedules():
+    grade_filter = request.args.get('grade')
+    status_filter = request.args.get('status')
+    school_id = session.get('school_id')
+    print("grade_filter",grade_filter)
+    
+    query = ExamSchedule.query.join(Grade, Grade.school_id == school_id)
+    
+    if grade_filter:
+        query = query.filter(ExamSchedule.grade_id == grade_filter)
+    if status_filter:
+        if status_filter == 'scheduled':
+            query = query.filter(ExamSchedule.exam_date >= datetime.datetime.now())
+        elif status_filter == 'finished':
+            query = query.filter(ExamSchedule.exam_date < datetime.datetime.now())
+    
+    schedules = query.all()
+    data = [
+    {
+        "id": schedule.id,
+        "term": schedule.term,
+        "subject": schedule.subject.title,
+        "grade": schedule.grade.title,
+        "exam_date": schedule.exam_date.strftime("%Y-%m-%d %H:%M")
+    }
+    for schedule in schedules
+    ]
+    return jsonify({"data": data})
+    #return render_template('exam_schedules_list.html', schedules=schedules)
+
+# Manage Exam Schedule
+@app.route('/exam-schedules/manage', methods=['GET', 'POST'])
+def manage_exam_schedule():
+    school_id = session.get('school_id')
+    id = request.form.get('id')
+    term=request.form['term'],
+    subject_id=request.form['subject_id'],
+    grade_id=request.form['grade_id'],
+    exam_date=request.form['exam_date']
+
+    if id:  # Update existing event
+        examSchedule = ExamSchedule.query.get(id)
+        examSchedule.term = term
+        examSchedule.subject_id = subject_id
+        examSchedule.grade_id = grade_id
+        examSchedule.exam_date = datetime.datetime.fromisoformat(exam_date)
+    else:  # Add new event        
+        new_schedule = ExamSchedule(
+            term=term,
+            subject_id=subject_id,
+            grade_id=grade_id,
+            exam_date=datetime.datetime.fromisoformat(exam_date)
+        )
+        db.session.add(new_schedule)
+
+    db.session.commit()
+    return jsonify({"message": "Event saved successfully"})
+    
+
+@app.route('/exam_schedules/edit/<int:id>', methods=['GET', 'POST'])
+def edit_exam_schedule(id):
+    """Edit an existing event."""   
+  
+    examSchedule = ExamSchedule.query.get(id)
+    school_id = session.get('school_id')  # Fetch the school ID from session
+
+    grades = Grade.query.filter_by(school_id=school_id).all()  # Retrieve all grades
+    
+    subjects = Subject.query.filter_by(school_id=school_id).all() 
+ 
+    return render_template('exam_schedule_manage.html',subjects=subjects, grades=grades, examSchedule=examSchedule)
+# Delete Exam Schedule
+@app.route('/exam-schedules/delete/<int:id>', methods=['DELETE'])
+def delete_exam_schedule(id):
+    schedule = ExamSchedule.query.get(id)
+    if schedule:
+        db.session.delete(schedule)
+        db.session.commit()
+    return jsonify({"message": "Exam Schedule deleted successfully"})
+@app.route('/exam-schedules/add')
+def manage_exam_schedules_page():
+    school_id = session.get('school_id')  # Fetch the school ID from session
+
+    grades = Grade.query.filter_by(school_id=school_id).all()  # Retrieve all grades
+    
+    subjects = Subject.query.filter_by(school_id=school_id).all() 
+ 
+    return render_template('exam_schedule_manage.html',subjects=subjects, grades=grades)
+
 if __name__ == '__main__':
     app.run(debug=True)
 

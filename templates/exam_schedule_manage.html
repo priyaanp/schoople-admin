@@ -1,0 +1,68 @@
+{% extends 'baseform.html' %}
+
+{% block title %}Exam Schedule{% endblock %}
+
+{% block content %}
+<div class="container mt-5 form-field-container">
+    <div class="form-page-header">
+        <h4>{{ 'Edit' if examSchedule else 'Add' }} Exam Schedule</h4>
+    </div>
+        <form id="exam-schedules" method="POST">
+            <input type="hidden" name="id" value="{{examSchedule.id if examSchedule}}">
+            <div class="mb-3">
+                <label for="term" class="form-label">Term:</label>
+                <select id="term" name="term" class="form-control">
+                    <option value="">Select Term</option>
+                    <option value="Midterm 1" {% if examSchedule and examSchedule.term == "Midterm 1" %}selected{% endif %}>Midterm 1</option>
+                    <option value="First" {% if examSchedule and examSchedule.term == "First" %}selected{% endif %}>First</option>
+                    <option value="Midterm 2" {% if examSchedule and examSchedule.term == "Midterm 2" %}selected{% endif %}>Midterm 2</option>
+                    <option value="Second" {% if examSchedule and examSchedule.term == "Second" %}selected{% endif %}>Second</option>
+                    <option value="Midterm 3" {% if examSchedule and examSchedule.term == "Midterm 3" %}selected{% endif %}>Midterm 3</option>
+                    <option value="Third" {% if examSchedule and examSchedule.term == "Third" %}selected{% endif %}>Third</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="subject_id" class="form-label">Subject:</label>
+                <select class="form-control" id="subject_id" name="subject_id" required>
+                    <option value="">Select Subject</option>
+                    {% for subject in subjects %}
+                    <option value="{{ subject.id }}" {% if examSchedule and subject.id == examSchedule.subject.id %}selected{% endif %}>{{ subject.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="school_grade_section_id" class="form-label">Grade Section:</label>
+                <select id="grade_id" name="grade_id" class="form-control">
+                    <option value="">Select Grade</option>
+                    {% for grade in grades %}
+                    <option value="{{ grade.id }}" {% if examSchedule and grade.id == examSchedule.grade.id %}selected{% endif %}>
+                        {{ grade.title }}</option>
+                    {% endfor %}
+           
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="exam_date" class="form-label">Exam Date:</label>
+                <input type="datetime-local" class="form-control" id="exam_date" name="exam_date" value="{{examSchedule.exam_date if examSchedule else '' }}" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a href="/exam-schedules/list" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+    
+            $('#exam-schedules').on('submit', function (e) {
+                e.preventDefault();
+                $.post('/exam-schedules/manage', $(this).serialize(), function () {
+                    window.location.href = '/exam-schedules/list';
+                });
+            });
+        });
+    </script>    
+{% endblock %}
